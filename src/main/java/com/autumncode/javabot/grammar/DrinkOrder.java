@@ -1,9 +1,16 @@
 package com.autumncode.javabot.grammar;
 
-/**
- * Created by Joseph on 3/2/2016.
- */
+import com.google.common.base.MoreObjects;
+
 public class DrinkOrder {
     public Vessel vessel;
     public String description;
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("vessel", vessel)
+                .add("description", description)
+                .toString();
+    }
 }

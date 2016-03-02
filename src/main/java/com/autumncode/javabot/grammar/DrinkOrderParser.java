@@ -10,8 +10,13 @@ import java.util.stream.Stream;
 public class DrinkOrderParser extends BaseParser<DrinkOrder> {
     Collection<String> vessels = Stream.of(Vessel.values()).map(Enum::name).collect(Collectors.toList());
 
-    public boolean run(final Runnable runnable) {
-        runnable.run();
+public boolean assignVessel() {
+    peek().vessel=Vessel.valueOf(match().toUpperCase());
+    return true;
+}
+
+    public boolean assignDrink() {
+        peek().description=match();
         return true;
     }
 
@@ -25,14 +30,14 @@ public class DrinkOrderParser extends BaseParser<DrinkOrder> {
 
     public Rule OF() {
         return sequence(
-                oneOrMore(wsp()),
+                wsp(),
                 ignoreCase("of"),
-                zeroOrMore(wsp())
+                wsp()
         );
     }
 
     public Rule DRINK() {
-        return oneOrMore(alpha());
+        return join(oneOrMore(alpha())).using(oneOrMore(wsp())).min(1);
     }
 
     public Rule vesselType() {
@@ -44,10 +49,10 @@ public class DrinkOrderParser extends BaseParser<DrinkOrder> {
                 push(new DrinkOrder()),
                 optional(ARTICLE()),
                 vesselType(),
-                run(() -> peek().vessel = Vessel.valueOf(match().toUpperCase())),
+                assignVessel(),
                 OF(),
                 DRINK(),
-                run(() ->peek().description = match())
+                assignDrink()
         );
     }
 }

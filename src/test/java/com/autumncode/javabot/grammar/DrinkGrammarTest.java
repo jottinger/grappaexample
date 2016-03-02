@@ -43,7 +43,7 @@ public class DrinkGrammarTest {
         ArticleVesselParser parser = Grappa.createParser(ArticleVesselParser.class);
         ListeningParseRunner<Vessel> runner = new ListeningParseRunner<>(parser.VESSEL());
         for (String article : articles) {
-            String newInput=article+" "+input;
+            String newInput = article + " " + input;
             ParsingResult<Vessel> result = runner.run(newInput);
             assertEquals(result.isSuccess(), valid);
             if (result.isSuccess()) {
@@ -58,10 +58,10 @@ public class DrinkGrammarTest {
         ArticleVesselOfParser parser = Grappa.createParser(ArticleVesselOfParser.class);
         ListeningParseRunner<Vessel> runner = new ListeningParseRunner<>(parser.VESSEL());
         for (String article : articles) {
-            String newInput=article+" "+input;
+            String newInput = article + " " + input;
             ParsingResult<Vessel> result = runner.run(newInput);
             assertFalse(result.isSuccess()); // no of!
-            result=runner.run(newInput+" of");
+            result = runner.run(newInput + " of");
             assertEquals(result.isSuccess(), valid);
             if (result.isSuccess()) {
                 assertEquals(result.getTopStackValue(), resultValue);
@@ -71,11 +71,11 @@ public class DrinkGrammarTest {
 
     @Test
     public void testDrinkOrder() {
-        DrinkOrderParser parser=Grappa.createParser(DrinkOrderParser.class);
+        DrinkOrderParser parser = Grappa.createParser(DrinkOrderParser.class);
         ListeningParseRunner<DrinkOrder> runner = new ListeningParseRunner<>(parser.DRINKORDER());
-        ParsingResult<DrinkOrder> order=runner.run("a pint of beer");
+        ParsingResult<DrinkOrder> order = runner.run("a pint of duck vomit");
         assertTrue(order.isSuccess());
-        System.out.println(order.getTopStackValue());
-
+        assertEquals(order.getTopStackValue().vessel, Vessel.PINT);
+        assertEquals(order.getTopStackValue().description, "duck vomit");
     }
 }
