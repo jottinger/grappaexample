@@ -13,7 +13,7 @@ public class ArticleVesselOfParser extends BaseParser<Vessel> {
 
     public Rule ARTICLE() {
         return sequence(
-                optional(oneOrMore(wsp())),
+                zeroOrMore(wsp()),
                 trieIgnoreCase("a", "an", "the"),
                 oneOrMore(wsp())
         );
@@ -23,7 +23,7 @@ public class ArticleVesselOfParser extends BaseParser<Vessel> {
         return sequence(
                 oneOrMore(wsp()),
                 ignoreCase("of"),
-                optional(oneOrMore(wsp()))
+                zeroOrMore(wsp())
         );
     }
 
@@ -35,8 +35,8 @@ public class ArticleVesselOfParser extends BaseParser<Vessel> {
         return sequence(
                 optional(ARTICLE()),
                 vesselType(),
-                OF(),
-                push(Vessel.valueOf(match().toUpperCase()))
-        );
+                push(Vessel.valueOf(match().toUpperCase())),
+                OF()
+                );
     }
 }
