@@ -12,7 +12,11 @@ public class ArticleVesselParser extends BaseParser<Vessel> {
     Collection<String> vessels = Stream.of(Vessel.values()).map(Enum::name).collect(Collectors.toList());
 
     public Rule ARTICLE() {
-        return trieIgnoreCase("a", "an", "the");
+        return sequence(
+                optional(oneOrMore(wsp())),
+                trieIgnoreCase("a", "an", "the"),
+                oneOrMore(wsp())
+        );
     }
 
     public Rule vesselType() {
@@ -20,6 +24,10 @@ public class ArticleVesselParser extends BaseParser<Vessel> {
     }
 
     public Rule VESSEL() {
-        return sequence(optional(ARTICLE()), vesselType(), push(Vessel.valueOf(match().toUpperCase())));
+        return sequence(
+                optional(ARTICLE()),
+                vesselType(),
+                push(Vessel.valueOf(match().toUpperCase()))
+        );
     }
 }
