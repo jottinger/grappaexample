@@ -1,7 +1,6 @@
 package com.autumncode.javabot.grammar;
 
 import com.github.fge.grappa.Grappa;
-import com.github.fge.grappa.parsers.BaseParser;
 import com.github.fge.grappa.run.ListeningParseRunner;
 import com.github.fge.grappa.run.ParsingResult;
 import org.testng.annotations.DataProvider;
@@ -9,6 +8,7 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 public class DrinkGrammarTest {
     @DataProvider
@@ -67,5 +67,15 @@ public class DrinkGrammarTest {
                 assertEquals(result.getTopStackValue(), resultValue);
             }
         }
+    }
+
+    @Test
+    public void testDrinkOrder() {
+        DrinkOrderParser parser=Grappa.createParser(DrinkOrderParser.class);
+        ListeningParseRunner<DrinkOrder> runner = new ListeningParseRunner<>(parser.DRINKORDER());
+        ParsingResult<DrinkOrder> order=runner.run("a pint of beer");
+        assertTrue(order.isSuccess());
+        System.out.println(order.getTopStackValue());
+
     }
 }
