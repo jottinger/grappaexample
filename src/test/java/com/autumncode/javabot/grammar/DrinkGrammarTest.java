@@ -16,7 +16,11 @@ public class DrinkGrammarTest {
                 {"bowl", true, Vessel.BOWL},
                 {"spoon", true, Vessel.SPOON},
                 {"glass", true, Vessel.GLASS},
-                {"fork", false, null}
+                {"cup", true, Vessel.CUP},
+                {"pitcher", true, Vessel.PITCHER},
+                {"magnum", true, Vessel.MAGNUM},
+                {"bottle", true, Vessel.BOTTLE},
+                {"fork", false, null},
         };
     }
 
