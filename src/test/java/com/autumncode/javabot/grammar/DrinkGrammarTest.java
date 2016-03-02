@@ -34,4 +34,18 @@ public class DrinkGrammarTest {
             assertEquals(result.getTopStackValue(), resultValue);
         }
     }
+
+    @Test(dataProvider = "simpleVesselTestData")
+    public void testParseStringVessel(String input, boolean valid, Vessel resultValue) {
+        StringVesselParser parser = Grappa.createParser(StringVesselParser.class);
+        ListeningParseRunner<String> runner=new ListeningParseRunner<>(parser.VESSEL());
+        ParsingResult<String> result=runner.run(input);
+        assertEquals(result.isSuccess(), valid);
+        if(result.isSuccess()) {
+            assertEquals(result.getTopStackValue().toLowerCase(), resultValue.toString().toLowerCase());
+        }
+    }
+
+
+
 }
