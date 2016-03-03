@@ -267,5 +267,16 @@ faintly self-explanatory, but just in case: it says "this rule will match if zer
          testArticleGrammar(article, status, parser.articleWithWhitespace());
      }
 
+Believe it or not, we're actually most of the way to being able to build our full drink order parser - 
+we need to figure out how to get data from our parser (hint: it's related to that 
+<code>&lt;Void&gt;</code> in the parser's declaration), but that's actually the greatest
+burden we have remaining.
+
+One other thing that's worth noting as we go: our code so far actually runs twenty-three tests. On my
+development platform, it takes 64 milliseconds to run all 23 - the first one takes 49, where it's building 
+the parser for the first time. The rest take somewhere between 0 and 4 milliseconds - and I'm pretty 
+sure that 4ms reading is an outlier. Our grammar isn't complex, and I imagine we could write something 
+*without* a grammar that would be faster - maybe <code>HashSet&lt;String&gt;.contains(input.trim())</code> -
+but we're about to step into territory that would end up being a lot less maintainable as our grammar grows.
 
 

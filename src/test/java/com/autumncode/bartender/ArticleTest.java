@@ -12,6 +12,15 @@ import static org.testng.Assert.assertEquals;
 public class ArticleTest {
     ArticleParser parser = Grappa.createParser(ArticleParser.class);
 
+    private void testArticleGrammar(String article, boolean status, Rule rule) {
+        ListeningParseRunner<Void> runner
+                = new ListeningParseRunner<>(rule);
+        ParsingResult<Void> articleResult = runner.run(article);
+        assertEquals(articleResult.isSuccess(), status,
+                "failed check on " + article + ", parse result was "
+                        + articleResult + " and expected " + status);
+    }
+
     @DataProvider
     Object[][] articleData() {
         return new Object[][]{
@@ -26,38 +35,9 @@ public class ArticleTest {
         };
     }
 
-    @DataProvider
-    Object[][] fullArticleData() {
-        return new Object[][]{
-                {"a", true},
-                {" a", true},
-                {"a ", true},
-                {" a ", true},
-                {" a a", false},
-                {"an", true},
-                {"the", true},
-                {"ar", false},
-                {" ar", false},
-        };
-    }
-
     @Test(dataProvider = "articleData")
     public void testOnlyArticle(String article, boolean status) {
         testArticleGrammar(article, status, parser.article());
-    }
-
-    private void testArticleGrammar(String article, boolean status, Rule rule) {
-        ListeningParseRunner<Void> runner
-                = new ListeningParseRunner<>(rule);
-        ParsingResult<Void> articleResult = runner.run(article);
-        assertEquals(articleResult.isSuccess(), status,
-                "failed check on " + article + ", parse result was "
-                        + articleResult + " and expected " + status);
-    }
-
-    @Test(dataProvider = "fullArticleData")
-    public void testARTICLE(String article, boolean status) {
-        testArticleGrammar(article, status, parser.articleWithWhitespace());
     }
 
     @DataProvider
@@ -96,5 +76,4 @@ public class ArticleTest {
     public void testArticleWithWhitespace(String article, boolean status) {
         testArticleGrammar(article, status, parser.articleWithWhitespace());
     }
-
 }
