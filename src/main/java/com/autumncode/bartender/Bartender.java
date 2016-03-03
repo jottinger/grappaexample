@@ -22,7 +22,7 @@ public class Bartender {
     }
 
     private void writePrompt() {
-        System.out.print("Your order? ");
+        System.out.print("What're ya havin'? ");
         System.out.flush();
     }
 

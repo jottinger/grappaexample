@@ -44,7 +44,7 @@ public class Bartender {
     }
 
     private void writePrompt() {
-        System.out.print("Your order? ");
+        System.out.print("What're ya havin'? ");
         System.out.flush();
     }
 
@@ -743,3 +743,78 @@ has matched; these methods are for convenience only.  Actually, let's show the `
         );
     }
 
+This leaves two new rules to explain: `DRINK()` and `DRINKORDER()`. Here's `DRINK()`:
+
+    public Rule DRINK() {
+        return sequence(
+                join(oneOrMore(firstOf(alpha(), digit())))
+                        .using(oneOrMore(wsp()))
+                        .min(1),
+                assignDrink()
+        );
+    }
+
+This rule basically builds a list of words. It's a sequence of operations; the first builds the match of 
+the words, and the second operation assigns the matched content to the `DrinkOrder`'s description.
+
+The match of the words is really just a sequence of alphanumeric characters. It requires at least *one*
+such sequence to exist, but will consume as many as there are in the input.
+
+Now for the `Rule` that does most of the work: `DRINKORDER()`.
+
+    public Rule DRINKORDER() {
+        return sequence(
+                push(new DrinkOrder()),
+                zeroOrMore(wsp()),
+                firstOf(
+                        NOTHING(),
+                        sequence(
+                                optional(sequence(
+                                        ARTICLE(),
+                                        oneOrMore(wsp())
+                                )),
+                                VESSEL(),
+                                oneOrMore(wsp()),
+                                OF(),
+                                oneOrMore(wsp()),
+                                DRINK()
+                        )
+                ),
+                zeroOrMore(wsp()),
+                EOI
+        );
+    }
+
+Again, we have a sequence. It works something like this:
+
+* First, push a new `DrinkOrder` onto the stack, to keep track of our order's state.
+* Consume any leading whitespace.
+* Either:
+    * Check for the terminal condition ("nothing", for example), or
+    * Check for a new sequence, of the following form:
+        * An optional sequence:
+            * An article
+            * Any trailing whitespace after the article
+        * A vessel
+        * One or more whitespace characters
+        * The lexeme matching "of"
+        * One or more whitespace characters
+        * The drink description
+* Any trailing whitespace
+* The end of input
+
+We've basically built most of this through our parsers, bit by bit; armed with the ability to `peek()` and `push()`,
+we can build some incredibly flexible parsers with fairly simple code.
+
+## Conclusion
+
+Given all of this, we can run our Bartender class, and order almost anything we want:
+
+    $ java -cp . com.autumncode.bartender.Bartender
+    What're ya havin'? a glass of water
+    Here's your glass of water. Please drink responsibly!
+    What're ya havin'? a toeful of shoe polish
+    I'm sorry, I don't understand. Try again?
+    What're ya havin'? a pint of indigo ink
+    Here's your pint of indigo ink. Please drink responsibly!
+    What're ya havin'? nothing
