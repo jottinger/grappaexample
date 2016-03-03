@@ -106,6 +106,8 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 public class ArticleTest {
+    ArticleParser parser = Grappa.createParser(ArticleParser.class);
+    
     @DataProvider
     Object[][] articleData() {
         return new Object[][]{
@@ -122,10 +124,13 @@ public class ArticleTest {
 
     @Test(dataProvider = "articleData")
     public void testOnlyArticle(String article, boolean status) {
-        ArticleParser parser = Grappa.createParser(ArticleParser.class);
-        ListeningParseRunner&lt;Void&gt; runner
-                = new ListeningParseRunner&lt;&gt;(parser.article());
-        ParsingResult&lt;Void&gt; articleResult = runner.run(article);
+        testArticleGrammar(article, status, parser.article());
+    }
+    
+    private void testArticleGrammar(String article, boolean status, Rule rule) {
+        ListeningParseRunner<Void> runner
+                = new ListeningParseRunner<>(rule);
+        ParsingResult<Void> articleResult = runner.run(article);
         assertEquals(articleResult.isSuccess(), status,
                 "failed check on " + article + ", parse result was "
                         + articleResult + " and expected " + status);
@@ -134,19 +139,42 @@ public class ArticleTest {
 
 So what is happening here?
 
-First, we create our `ArticleParser` instance through Grappa. Then we create a `ListeningParseRunner`, with the entry point to the grammar as a parameter; this builds the internal model for the parser (stuff we don't really care about, but it *is* memoized, so we can use that code over and over again without incurring the time it takes for processing the grammar at runtime.)
+First, we create a global (for the test) `ArticleParser` instance through Grappa. Then, for every test,
+ we create a `ListeningParseRunner`, with the entry point to the grammar as a parameter; this builds 
+the internal model for the parser (stuff we don't really care about, but it *is* memoized, 
+so we can use that code over and over again without incurring the time it takes for 
+processing the grammar at runtime.)
 
-After we've constructed our Parser's `Runner`, we do something completely surprising: we run it, with <code>ParsingResult&lt;Void&gt; articleResult = runner.run(article);</code>. Adding in the TestNG data provider, this means we're calling our parser with every one of those articles as a test, and checking to see if the parser's validity - shown by `articleResult.isSuccess()` - matches what we expect. 
+> I used a utility method because the form of the tests themselves doesn't change - only the inputs and 
+the rules being applied. As we add more to our grammar, this will allow us to run *similar* tests
+with different inputs, results, and rules.
 
-In most cases, it's pretty straightforward, since we are indeed passing in valid articles. Where we're not, the parser says that it's not a successful parse, as when we pass it `me`. 
+After we've constructed our Parser's `Runner`, we do something completely surprising: we run it, 
+with <code>ParsingResult&lt;Void&gt; articleResult = runner.run(article);</code>. Adding 
+in the TestNG data provider, this means we're calling our parser with every one of those articles 
+as a test, and checking to see if the parser's validity - 
+shown by `articleResult.isSuccess()` - matches what we expect. 
 
-There are three cases where the result might be surprising: `" a"`, `"a "`, and `"afoo"`. The whitespace is significant, for the parser; for our test, the article with a *trailing* space *passes validation*, as does "`afoo`", while the article with the *leading* space does not.
+In most cases, it's pretty straightforward, since we are indeed passing in valid articles. Where we're not, 
+the parser says that it's not a successful parse, as when we pass it `me`. 
 
-The leading space is easy: our parser doesn't consume any whitespace, and Grappa assumes whitespace is significant unless told otherwise. So that space doesn't match our article; it fails to parse, because of that.
+There are three cases where the result might be surprising: `" a"`, `"a "`, and `"afoo"`. 
+The whitespace is significant, for the parser; for our test, the article with a *trailing* space 
+*passes validation*, as does "`afoo`", while the article with the *leading* space does not.
 
-However, the *trailing* space (and `"afoo"`) is a little more odd. What's happening there is that Grappa is parsing as much of the input as is necessary to fulfill the grammar; once it's done doing that, it doesn't care about anything that *follows* the grammar. So once it matches the initial text - the "`a`" - it doesn't care what the rest of the content is. It's not significant that `"foo"` follows the "`a`"; it matches the "`a`" and it's done.
+The leading space is easy: our parser doesn't consume any whitespace, and Grappa assumes whitespace 
+is significant unless told otherwise. So that space doesn't match our article; 
+it fails to parse, because of that.
 
-We can fix that, of course, by specifying a better rule, one that includes a *terminal condition*. That introduces a core concept for Grappa, the "sequence."
+However, the *trailing* space (and `"afoo"`) is a little more odd. What's happening there 
+is that Grappa is parsing as much of the input as is necessary to fulfill the grammar; 
+once it's done doing that, it doesn't care about anything that *follows* the grammar. So 
+once it matches the initial text - the "`a`" - it doesn't care what the rest of the 
+content is. It's not significant that `"foo"` follows the "`a`"; 
+it matches the "`a`" and it's done.
+
+We can fix that, of course, by specifying a better rule, one that includes 
+a *terminal condition*. That introduces a core concept for Grappa, the "sequence."
 
 Let's expand our `ArticleParser` a little more. Now it looks like:
 
@@ -168,5 +196,28 @@ public class ArticleParser extends BaseParser&lt;Void&gt; {
     }
 }</pre>
 
-What we've done is added a new Rule - `articleTerminal()` - which contains a sequence. That sequence is "an article" -- which consumes "a," "an", or "the" - and then the special `EOI` rule, which stands for "end of input." That means that our simple article grammar won't consume leading or trailing spaces - the grammar will fail if any content exists besides our article. We can show that with a new test:
+What we've done is added a new Rule - `articleTerminal()` - which contains a sequence. 
+That sequence is "an article" -- which consumes "a," "an", or "the" - and then the special `EOI` rule, 
+which stands for "end of input." That means that our simple article grammar won't consume leading or 
+trailing spaces - the grammar will fail if any content exists besides our article. 
+We can show that with a new test:
+
+<pre>@DataProvider
+ Object[][] articleTerminalData() {
+     return new Object[][]{
+             {"a", true},
+             {"an", true},
+             {"the", true},
+             {"me", false},
+             {"THE", true},
+             {" a", false},
+             {"a ", false},
+             {"afoo", false},
+     };
+ }
+ 
+ @Test(dataProvider = "articleTerminalData")
+ public void testArticleTerminal(String article, boolean status) {
+     testArticleGrammar(article, status, parser.articleTerminal());
+ }</pre>
 
