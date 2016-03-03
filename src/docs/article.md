@@ -512,7 +512,7 @@ Any input that doesn't follow that exact sequence (`"spoon bottle"`, for example
  We need to add a preposition ("of") and then generalized text handling for the type of drink, and we need to
  add the container type - but of this, only the type of drink will add any actual complexity to our parser.
  
- ## Rounding out the Bartender
+## Rounding out the Bartender
  
  Our `VesselParser` is actually a pretty good model for the `DrinkOrderParser` that our `Bartender`
  will use. What we need to add is matching for two extra tokens: "of," as mentioned, and then a 
@@ -561,7 +561,8 @@ for all properties.
 In other words, it's a fairly standard Javabean, but we're not showing all the the boilerplate code - and thanks
 to Lombok, we don't even *need* the boilerplate code. Lombok makes it for us.
  
- > If you *need* that code shown, you may be reading the wrong tutorial. 
- How did you make it this far?
+> If you do need the code for `equals()`, `hashCode()`, `toString()`, or the mutators, accessors, and 
+ constructors shown, you may be reading the wrong tutorial. How did you make it this far?
  
- 
+Before we dig into the parser - which has only one really interesting addition to the things we've seen so far - 
+let's take a look at our test.

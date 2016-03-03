@@ -30,6 +30,8 @@ public class DrinkOrderParserTest {
     public Object[][] drinkOrderProvider() {
         return new Object[][]{
                 {"a glass of water", true, new DrinkOrder(Vessel.GLASS, "water", false)},
+                {"a pitcher of old 66", true, new DrinkOrder(Vessel.PITCHER, "old 66", false)},
+                {"a    pint  of duck   vomit   ", true, new DrinkOrder(Vessel.PINT, "duck vomit", false)},
                 {"a shoeful of motor oil", false, null},
                 {"nothing", true, new DrinkOrder(null, null, true)},
         };

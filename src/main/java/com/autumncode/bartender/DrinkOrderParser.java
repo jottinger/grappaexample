@@ -8,10 +8,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DrinkOrderParser extends BaseParser<DrinkOrder> {
-    Collection<String> vessels = Stream.of(Vessel.values()).map(Enum::name).collect(Collectors.toList());
+    Collection<String> vessels = Stream
+            .of(Vessel.values())
+            .map(Enum::name)
+            .collect(Collectors.toList());
 
     public boolean assignDrink() {
-        peek().setDescription(match());
+        peek().setDescription(match().toLowerCase().replaceAll("\\s+", " "));
         return true;
     }
 
@@ -45,7 +48,9 @@ public class DrinkOrderParser extends BaseParser<DrinkOrder> {
 
     public Rule DRINK() {
         return sequence(
-                join(oneOrMore(alpha())).using(oneOrMore(wsp())).min(1),
+                join(oneOrMore(firstOf(alpha(), digit())))
+                        .using(oneOrMore(wsp()))
+                        .min(1),
                 assignDrink()
         );
     }
@@ -60,20 +65,23 @@ public class DrinkOrderParser extends BaseParser<DrinkOrder> {
     public Rule DRINKORDER() {
         return sequence(
                 push(new DrinkOrder()),
-                sequence(
-                        zeroOrMore(wsp()),
-                        firstOf(NOTHING(),
-                                sequence(
-                                        optional(sequence(
-                                                ARTICLE(),
-                                                oneOrMore(wsp())
-                                        )),
-                                        vesselType(),
-                                        oneOrMore(wsp()),
-                                        OF(),
-                                        oneOrMore(wsp()),
-                                        DRINK()
-                                ))),
-                EOI);
+                zeroOrMore(wsp()),
+                firstOf(
+                        NOTHING(),
+                        sequence(
+                                optional(sequence(
+                                        ARTICLE(),
+                                        oneOrMore(wsp())
+                                )),
+                                vesselType(),
+                                oneOrMore(wsp()),
+                                OF(),
+                                oneOrMore(wsp()),
+                                DRINK()
+                        )
+                ),
+                zeroOrMore(wsp()),
+                EOI
+        );
     }
 }
