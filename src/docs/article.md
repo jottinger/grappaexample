@@ -273,7 +273,7 @@ we need to figure out how to get data from our parser (hint: it's related to tha
 burden we have remaining.
 
 One other thing that's worth noting as we go: our code so far actually runs twenty-three tests. On my
-development platform, it takes 64 milliseconds to run all 23 - the first one takes 49, where it's building 
+development platform, it takes 64 milliseconds to run all twenty-three - the first one takes 49, where it's building 
 the parser for the first time. The rest take somewhere between 0 and 4 milliseconds - and I'm pretty 
 sure that 4ms reading is an outlier. Our grammar isn't complex, and I imagine we could write something 
 *without* a grammar that would be faster - maybe <code>HashSet&lt;String&gt;.contains(input.trim())</code> -
@@ -283,3 +283,158 @@ but we're about to step into territory that would end up being a lot less mainta
   every now and then you'd see a test that ran slower. My initial guess is that this is related 
   to garbage collection or some other housekeeping chore on the JVM's part, but I haven't verified it.)
 
+## Getting Data out of our Parser
+
+Grappa uses an internal stack of values to track and expose information. 
+We can tell it the type of the stack values - and in fact, we already did so in our `ArticleParser`. It's the
+<code>&lt;Void&gt;</code> we used - that says that we have a stack of `Void` values, which is a cute way of
+saying "no value at all." (If you remember carefully, we pointed that out when we first started 
+describing the `ArticleParser` - this is where that information is useful!)
+
+Therefore, all we need to do is expose a type, and then manipulate that stack of values. We do so with a
+special type of `Rule`, a function that returns a boolean that indicates whether the `Rule` was successful.
+
+Our goal with the article is to parse drink orders, of the general form of "a glass of water." We already worked 
+on a parser that demonstrates parsing the "a" there - it's time to think about parsing the next term, which
+we'll call a "vessel." Or, since we're using Java, a `Vessel` - which we'll encapsulate in an `Enum` so we can
+easily add `Vessel`s.
+
+The `Enum` itself is pretty simple:
+
+package com.autumncode.bartender;
+
+    public enum Vessel {
+        PINT,
+        BOWL,
+        GLASS,
+        CUP,
+        PITCHER,
+        MAGNUM,
+        BOTTLE,
+        SPOON
+    }
+    
+What we want to do is create a parser such that we can hand it "a glass" and get `Vessel.GLASS` out of it.
+
+Given that we've said that a parser can be constructed with the "return type", that tells us that our
+`VesselParser` wants to extend <code>BaseParser&lt;Vessel&gt;</code>, and so it does. In fact, our 
+`VesselParser` isn't even very surprising, given what we've learned from our `ArticleParser`:
+
+<pre>public class VesselParser extends BaseParser&lt;Vessel&gt; {
+    final static Collection<String> vessels = Stream
+            .of(Vessel.values())
+            .map(Enum::name)
+            .collect(Collectors.toList());
+
+    public Rule vessel() {
+        return trieIgnoreCase(vessels);
+    }
+}</pre>
+
+What does this do? Well, most of it is building a `List` of the `Vessel` values, by extracting the values
+from `Vessel`. It's marked `final static` so it will only initialize that `List` once; the 
+`Rule` (`vessel()`) simply uses the exact same technique we used in parsing articles. It doesn't actually
+ do anything with the match, though. It would simply fail if it was handed text that did not match
+ a `Vessel` type.
+ 
+ Let's try it out, using the same sort of generalized pattern we saw in our `ArticleParser` tests. (We're going to
+ add a new generalized test method, when we add in the type that should be returned, but this will do
+ for now.)
+ 
+<pre>public class VesselTest {
+    VesselParser parser = Grappa.createParser(VesselParser.class);
+
+    private void testGrammar(String corpus, boolean status, Rule rule) {
+        ListeningParseRunner&lt;Vessel&gt; runner
+                = new ListeningParseRunner&lt;&gt;(rule);
+        ParsingResult&lt;Vessel&gt; result = runner.run(corpus);
+        assertEquals(result.isSuccess(), status,
+                "failed check on " + corpus + ", parse result was "
+                        + result + " and expected " + status);
+    }
+    
+    @DataProvider
+    Object[][] simpleVesselParseData() {
+        return new Object[][]{
+                {Vessel.PINT.name(), true,},
+                {Vessel.BOWL.name(), true,},
+                {Vessel.GLASS.name(), true,},
+                {Vessel.CUP.name(), true,},
+                {Vessel.PITCHER.name(), true,},
+                {Vessel.MAGNUM.name(), true,},
+                {Vessel.BOTTLE.name(), true,},
+                {Vessel.SPOON.name(), true,},
+                {"hatful", false,},
+        };
+    }
+
+    @Test(dataProvider = "simpleVesselParseData")
+    public void testSimpleVesselParse(String corpus, boolean valid) {
+        testGrammar(corpus, valid, parser.vessel());
+    }
+}</pre>
+
+ The idiom that Grappa uses - and that I will use, in any event - involves the use of the 
+ `push()` and `match()` methods.
+ 
+ Basically, when we match a `Vessel` - using that handy `vessel()` rule - what we will do is
+ `push()` a value corresponding the the `Vessel` whose name corresponds to the `Rule` we just wrote. 
+ We can get the text of the `Rule` we just matched, with the rather-handily-named `match()` method.
+ 
+ It's actually simpler to program than it is to describe:
+ 
+     // in VesselParser.java
+     public Rule VESSEL() {
+         return sequence(
+                 vessel(), 
+                 push(Vessel.valueOf(match().toUpperCase()))
+         );
+     }
+
+This is a rule that encapsulates the matching of the vessel name - thus, `vessel()` - and then, assuming the
+match is found, calls `push()` with the `Vessel` whose text is held in `match()`.
+ 
+That's fine to say, but much better to show. Here's a test of our `VESSEL()` rule, following the same sort of
+generalized pattern we saw for parsing articles, along with a new generalized test runner that examines the
+returned value if the input data is valid according to the grammar:
+
+    private void testGrammarResult(String corpus, boolean status, Vessel value, Rule rule) {
+        ListeningParseRunner<Vessel> runner
+                = new ListeningParseRunner<>(rule);
+        ParsingResult<Vessel> result = runner.run(corpus);
+        assertEquals(result.isSuccess(), status,
+                "failed check on " + corpus + ", parse result was "
+                        + result + " and expected " + status);
+        if(result.isSuccess()) {
+            assertEquals(result.getTopStackValue(), value);
+        }
+    }
+
+    @DataProvider
+    Object[][] simpleVesselReturnData() {
+        return new Object[][]{
+                {Vessel.PINT.name(), true, Vessel.PINT},
+                {Vessel.BOWL.name(), true, Vessel.BOWL},
+                {Vessel.GLASS.name(), true, Vessel.GLASS},
+                {Vessel.CUP.name(), true, Vessel.CUP},
+                {Vessel.PITCHER.name(), true, Vessel.PITCHER},
+                {Vessel.MAGNUM.name(), true, Vessel.MAGNUM},
+                {Vessel.BOTTLE.name(), true, Vessel.BOTTLE},
+                {Vessel.SPOON.name(), true, Vessel.SPOON},
+                {"hatful", false, null},
+        };
+    }
+
+    @Test(dataProvider = "simpleVesselReturnData")
+    public void testSimpleVesselResult(String corpus, boolean valid, Vessel value) {
+        testGrammarResult(corpus, valid, value, parser.VESSEL());
+    }
+
+Note that we're testing with a `Rule` of `parser.VESSEL()` - the one that simply matches a vessel name is
+named `parser.vessel()`, and the one that updates the parser's value stack is `parser.VESSEL()`. 
+
+> This is a personal idiom. I reserve the right to change my mind if sanity demands it.
+
+So what this does is very similar to our prior test - except it also tests the value on the parser's stack 
+(accessed via `result.getTopStackValue()`) against the value that our `DataProvider` says should be returned,
+as long as the parse was expected to be valid.
