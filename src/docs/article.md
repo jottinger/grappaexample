@@ -1,7 +1,10 @@
-Grappa is a parser library for Java. It's a fork of Parboiled, which focuses more on Scala as 
-a runtime environment; Grappa seems to use more Java idioms than Parboiled does.
+[Grappa](https://github.com/fge/grappa) is a parser library for Java. 
+It's a fork of [Parboiled](https://github.com/sirthias/parboiled/wiki), 
+which focuses more on [Scala](http://scala-lang.org) as 
+a development environment; Grappa seems to use more Java idioms than Parboiled does.
 
-Grappa's similar in focus to other libraries like ANTLR and JavaCC; the main advantage to using something 
+Grappa's similar in focus to other libraries like [ANTLR](http://www.antlr.org/) and 
+[JavaCC](https://javacc.java.net/); the main advantage to using something 
 like Grappa instead of ANTLR is in the lack of a processing phase. With ANTLR and JavaCC, you 
 have a grammar file, which then generates a lexer and a parser in Java source code. 
 Then you compile that generated source to get your parser.
@@ -22,6 +25,9 @@ It's an okay tutorial, but the main thing *I* thought after reading was:
 > That led me to Parboiled, but some Parboiled users recommended Grappa for Java, so here we are.
 
 That tutorial basically writes a parser for drink orders. 
+ 
+> If you're interested, the code is on [GitHub](https://github.com), in my 
+[grappaexample](https://github.com/jottinger/grappaexample) repository.
 
 Imagine an automated bartender: "What're ya havin?"
 
@@ -30,7 +36,9 @@ We can imagine more variations on this, but we're going to center on one: we'd a
 allow our bartender to parse orders from people who're a bit too inebriated to use the introductory
 article: "`glass of wine`" (no `a`) should also be acceptable.
 
-Let's take a look at our Bartender's source code, just to set the stage for our grammar. 
+Let's take a look at our 
+[bartender](https://github.com/jottinger/grappaexample/blob/master/src/main/java/com/autumncode/bartender/Bartender.java)'s 
+source code, just to set the stage for our grammar. 
 (Actually, we'll be writing multiple grammars, because we want to take it in small pieces.)
 
 <pre>package com.autumncode.bartender;
@@ -119,7 +127,8 @@ called `article()`, that tries to match one of our words:
 
 This rule should match any variant of "a", "A", "an", "tHe", or anything like that - 
 while not matching any text that doesn't somehow fit in as an article. Let's 
-write a test that demonstrates this, using TestNG so we can use data providers:
+write a test that demonstrates this, using [TestNG](http://testng.org) so we can use 
+[data providers](http://testng.org/doc/documentation-main.html#parameters-dataproviders):
 
 <pre>package com.autumncode.bartender;
 
@@ -244,7 +253,7 @@ Object[][] articleTerminalData() {
 
 @Test(dataProvider = "articleTerminalData")
 public void testArticleTerminal(String article, boolean status) {
- testArticleGrammar(article, status, parser.articleTerminal());
+    testArticleGrammar(article, status, parser.articleTerminal());
 }</pre>
  
 Now our test performs as we'd expect: it matches the article, and *only* the article - as soon as 
@@ -533,7 +542,7 @@ First, we added our `article()` `Rule`, from our `ArticleParser`. It might be te
  
 Any input that doesn't follow that exact sequence (`"spoon bottle"`, for example) fails.
  
- Believe it or not, we're now very much on the downhill slide for our bar-tending AI.
+ Believe it or not, we're now very much on the downhill slide for our bar-tending program.
  
  We need to add a preposition ("of") and then generalized text handling for the type of drink, and we need to
  add the container type - but of this, only the type of drink will add any actual complexity to our parser.
@@ -578,7 +587,7 @@ return done;</pre>
     boolean terminal;
 }</pre>
       
-I'm actually using Lombok in the project (and the `@Data` annotation) but for the sake of example, 
+I'm actually using [Lombok](https://projectlombok.org/) in the project (and the `@Data` annotation) but for the sake of example, 
 imagine that we have the standard boilerplate accesors and mutators for each of those attributes.
 Thus, we can call `setDescription()`, et al, even though we're not showing that code. We're also going to have
 `equals()` and `hashCode()` created (via Lombok), as well as a no-argument constructor and another constructor
@@ -836,7 +845,7 @@ we can build some incredibly flexible parsers with fairly simple code.
 
 Given all of this, we can run our Bartender class, and order almost anything we want:
 
-    $ java -cp . com.autumncode.bartender.Bartender
+    $ java -jar bartender-1.0-SNAPSHOT.jar
     What're ya havin'? a glass of water
     Here's your glass of water. Please drink responsibly!
     What're ya havin'? a toeful of shoe polish
