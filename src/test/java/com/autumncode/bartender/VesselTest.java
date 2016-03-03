@@ -78,7 +78,7 @@ public class VesselTest {
         return new Object[][]{
                 {"a pint", true, Vessel.PINT},
                 {"the bowl", true, Vessel.BOWL},
-                {"  an glass", true, Vessel.GLASS},
+                {"  an GLASS", true, Vessel.GLASS},
                 {"a     cup", true, Vessel.CUP},
                 {"the pitcher    ", true, Vessel.PITCHER},
                 {" a an magnum", false, null},

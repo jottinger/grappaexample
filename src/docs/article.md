@@ -450,7 +450,7 @@ First, let's write our tests, so we know when we're done:
         return new Object[][]{
                 {"a pint", true, Vessel.PINT},
                 {"the bowl", true, Vessel.BOWL},
-                {"  an glass", true, Vessel.GLASS},
+                {"  an GLASS", true, Vessel.GLASS},
                 {"a     cup", true, Vessel.CUP},
                 {"the pitcher    ", true, Vessel.PITCHER},
                 {" a an magnum", false, null},
