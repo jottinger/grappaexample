@@ -1,14 +1,23 @@
-Grappa is a parser library for Java. It's a fork of Parboiled, which focuses more on Scala as a runtime environment; Grappa seems to use more Java idioms than Parboiled does.
+Grappa is a parser library for Java. It's a fork of Parboiled, which focuses more on Scala as 
+a runtime environment; Grappa seems to use more Java idioms than Parboiled does.
 
-Grappa's similar in focus to other libraries like ANTLR and JavaCC; the main advantage to using something like Grappa instead of ANTLR is in the lack of a processing phase. With ANTLR and JavaCC, you have a grammar file, which then generates a lexer and a parser in Java source code. Then you compile that generated source to get your parser.
+Grappa's similar in focus to other libraries like ANTLR and JavaCC; the main advantage to using something 
+like Grappa instead of ANTLR is in the lack of a processing phase. With ANTLR and JavaCC, you 
+have a grammar file, which then generates a lexer and a parser in Java source code. 
+Then you compile that generated source to get your parser.
 
-Grappa (and Parboiled) represent the grammar in actual source code, so there is no external phase; this makes programming with them *feel* faster. It's certainly easier to integrate with tooling, since there is no separate tool to invoke apart from the compiler itself.
+Grappa (and Parboiled) represent the grammar in actual source code, so there is no 
+external phase; this makes programming with them *feel* faster. It's certainly easier to 
+integrate with tooling, since there is no separate tool to invoke apart from the compiler itself.
 
 I'd like to walk through a simple experience of *using* Grappa, to perhaps help expose how Grappa works.
 
 ## The Goal
 
-What I want to do is mirror a tutorial I found for ANTLR, "[ANTLR 4: using the lexer, parser and listener with example grammar](http://www.theendian.com/blog/antlr-4-lexer-parser-and-listener-with-example-grammar/)." It's an okay tutorial, but the main thing *I* thought after reading was: "Hmm, ANTLR's great, everyone uses it, but let's see if there are alternatives."
+What I want to do is mirror a tutorial I found for ANTLR, "[ANTLR 4: using the lexer, 
+parser and listener with example grammar](http://www.theendian.com/blog/antlr-4-lexer-parser-and-listener-with-example-grammar/)." 
+It's an okay tutorial, but the main thing *I* thought after reading was: 
+"Hmm, ANTLR's great, everyone uses it, but let's see if there are alternatives."
 
 > That led me to Parboiled, but some Parboiled users recommended Grappa for Java, so here we are.
 
@@ -16,9 +25,13 @@ That tutorial basically writes a parser for drink orders.
 
 Imagine an automated bartender: "What're ya havin?"
 
-Well... let's automate that bartender, such that he can parse responses like "`A pint of beer`." We can imagine more variations on this, but we're going to center on one: we'd also like to allow our bartender to parse orders from people who're a bit too inebriated to use the introductory article: "`glass of wine`" (no `a`) should also be acceptable.
+Well... let's automate that bartender, such that he can parse responses like "`A pint of beer`." 
+We can imagine more variations on this, but we're going to center on one: we'd also like to
+allow our bartender to parse orders from people who're a bit too inebriated to use the introductory
+article: "`glass of wine`" (no `a`) should also be acceptable.
 
-Let's take a look at our Bartender's source code, just to set the stage for our grammar. (Actually, we'll be writing multiple grammars, because we want to take it in small pieces.)
+Let's take a look at our Bartender's source code, just to set the stage for our grammar. 
+(Actually, we'll be writing multiple grammars, because we want to take it in small pieces.)
 
 <pre>package com.autumncode.bartender;
 
@@ -70,30 +83,43 @@ public class Bartender {
         return done;
     }
 }</pre>
-This isn't the world's greatest command line application, but it serves to get the job done. We don't have to worry about `handleOrder` yet - we'll explain it as we go through generating a grammar.
+This isn't the world's greatest command line application, but it serves to get the job done.
+ We don't have to worry about `handleOrder` yet - we'll explain it as we go through generating a grammar.
 
 ## What it does
 
-Grappa describes a grammar as a set of `Rule`s. A rule can describe a match or an action; both matches and actions return boolean values to indicate success. A rule has failed when processing sees `false` in its stream.
+Grappa describes a grammar as a set of `Rule`s. A rule can describe a match or an action; 
+both matches and actions return boolean values to indicate success. A rule has failed 
+when processing sees `false` in its stream.
 
-Let's generate a very small parser for the sake of example. Our first parser (`ArticleParser`) is going to do nothing other than detect an [article](https://en.wikipedia.org/wiki/English_articles) - a word like "a", "an", or "the."
+Let's generate a very small parser for the sake of example. Our first parser (`ArticleParser`) 
+is going to do nothing other than detect an 
+[article](https://en.wikipedia.org/wiki/English_articles) - a word like "a", "an", or "the."
 
-> Actually, those are all of the articles in English - there are other forms of articles, but English has those three and no others as examples of articles.
+> Actually, those are all of the articles in English - there are other forms of 
+articles, but English has those three and no others as examples of articles.
 
-The way you interact with a parser is pretty simple. The grammar itself can extend <code>BaseParser&lt;T&gt;</code>, where `T` represents the output from the parser; you can use `Void` to indicate that the parser doesn't have any output internally.
+The way you interact with a parser is pretty simple. The grammar itself can extend 
+<code>BaseParser&lt;T&gt;</code>, where `T` represents the output from the parser; you 
+can use `Void` to indicate that the parser doesn't have any output internally.
 
 Therefore, our `ArticleParser`'s declaration will be:
 
 <pre>public class ArticleParser extends BaseParser&lt;Void&gt; {</pre>
 
-We need to add a `Rule` to our parser, so that we can define an entry point from which the parser should begin. As a first stab, we'll create a `Rule` called `article()`, that tries to match one of our words:
+We need to add a `Rule` to our parser, so that we can define an entry point from 
+which the parser should begin. As a first stab, we'll create a `Rule` 
+called `article()`, that tries to match one of our words:
 
 <pre>public class ArticleParser extends BaseParser&lt;Void&gt; {
     public Rule article() {
         return trieIgnoreCase("a", "an", "the");
     }
 }</pre>
-This rule should match any variant of "a", "A", "an", "tHe", or anything like that - while not matching any text that doesn't somehow fit in as an article. Let's write a test that demonstrates this, using TestNG so we can use data providers:
+
+This rule should match any variant of "a", "A", "an", "tHe", or anything like that - 
+while not matching any text that doesn't somehow fit in as an article. Let's 
+write a test that demonstrates this, using TestNG so we can use data providers:
 
 <pre>package com.autumncode.bartender;
 
