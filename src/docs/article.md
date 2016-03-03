@@ -96,7 +96,8 @@ This isn't the world's greatest command line application, but it serves to get t
 
 ## What it does
 
-Grappa describes a grammar as a set of `Rule`s. A rule can describe a match or an action; 
+Grappa describes a grammar as a set of 
+[`Rule`](http://fge.github.io/com/github/fge/grappa/rules/Rule.html)s. A rule can describe a match or an action; 
 both matches and actions return boolean values to indicate success. A rule has failed 
 when processing sees `false` in its stream.
 
@@ -108,8 +109,9 @@ is going to do nothing other than detect an
 articles, but English has those three and no others as examples of articles.
 
 The way you interact with a parser is pretty simple. The grammar itself can extend 
-<code>BaseParser&lt;T&gt;</code>, where `T` represents the output from the parser; you 
-can use `Void` to indicate that the parser doesn't have any output internally.
+<code><a href="http://fge.github.io/com/github/fge/grappa/parsers/BaseParser.html">BaseParser</a>&lt;T&gt;</code>, 
+where `T` represents the output from the parser; you 
+can use [`Void`](https://docs.oracle.com/javase/8/docs/api/java/lang/Void.html) to indicate that the parser doesn't have any output internally.
 
 Therefore, our `ArticleParser`'s declaration will be:
 
@@ -174,8 +176,10 @@ public class ArticleTest {
 
 So what is happening here?
 
-First, we create a global (for the test) `ArticleParser` instance through Grappa. Then, for every test,
- we create a `ListeningParseRunner`, with the entry point to the grammar as a parameter; this builds 
+First, we create a global (for the test) `ArticleParser` instance through 
+[`Grappa`](http://fge.github.io/com/github/fge/grappa/Grappa.html). Then, for every test,
+ we create a [`ListeningParseRunner`](http://fge.github.io/com/github/fge/grappa/run/ListeningParseRunner.html), 
+ with the entry point to the grammar as a parameter; this builds 
 the internal model for the parser (stuff we don't really care about, but it *is* memoized, 
 so we can use that code over and over again without incurring the time it takes for 
 processing the grammar at runtime.)
@@ -185,10 +189,11 @@ the rules being applied. As we add more to our grammar, this will allow us to ru
 with different inputs, results, and rules.
 
 After we've constructed our Parser's `Runner`, we do something completely surprising: we run it, 
-with <code>ParsingResult&lt;Void&gt; articleResult = runner.run(article);</code>. Adding 
+with <code><a href="http://fge.github.io/com/github/fge/grappa/run/ParsingResult.html">ParsingResult</a>&lt;Void&gt; 
+articleResult = runner.run(article);</code>. Adding 
 in the TestNG data provider, this means we're calling our parser with every one of those articles 
 as a test, and checking to see if the parser's validity - 
-shown by `articleResult.isSuccess()` - matches what we expect. 
+shown by <code>articleResult.<a href="http://fge.github.io/com/github/fge/grappa/run/ParsingResult.html#isSuccess()">isSuccess()</a></code> - matches what we expect. 
 
 In most cases, it's pretty straightforward, since we are indeed passing in valid articles. Where we're not, 
 the parser says that it's not a successful parse, as when we pass it `me`. 
@@ -209,7 +214,8 @@ content is. It's not significant that `"foo"` follows the "`a`";
 it matches the "`a`" and it's done.
 
 We can fix that, of course, by specifying a better rule, one that includes 
-a *terminal condition*. That introduces a core concept for Grappa, the "sequence."
+a *terminal condition*. That introduces a core concept for Grappa, the 
+"[sequence](http://fge.github.io/com/github/fge/grappa/parsers/BaseParser.html#sequence(java.lang.Object[]))."
 
 Let's expand our `ArticleParser` a little more. Now it looks like:
 
@@ -232,7 +238,8 @@ public class ArticleParser extends BaseParser&lt;Void&gt; {
 }</pre>
 
 What we've done is added a new Rule - `articleTerminal()` - which contains a sequence. 
-That sequence is "an article" -- which consumes "a," "an", or "the" - and then the special `EOI` rule, 
+That sequence is "an article" -- which consumes "a," "an", or "the" - and then the special 
+[`EOI`](http://fge.github.io/com/github/fge/grappa/parsers/BaseParser.html#EOI) rule, 
 which stands for "end of input." That means that our simple article grammar won't consume leading or 
 trailing spaces - the grammar will fail if any content exists besides our article. 
 We can show that with a new test:
@@ -276,7 +283,10 @@ rules from Grappa itself. Here's our `Rule` for articles with surrounding whites
     }
 
 What we've done is added two extra parsing rules, around our `article()` rule: `zeroOrMore(wsp())`.
-The `wsp()` rule matches whitespace - spaces and tabs, for example. The `zeroOrMore()` rule seems
+The [`wsp()`](http://fge.github.io/com/github/fge/grappa/parsers/BaseParser.html#wsp()) 
+rule matches whitespace - spaces and tabs, for example. The 
+[`zeroOrMore()`](http://fge.github.io/com/github/fge/grappa/parsers/BaseParser.html#zeroOrMore(java.lang.Object)) 
+rule seems
 faintly self-explanatory, but just in case: it says "this rule will match if zero or more of the 
 *contained* rules match."
  
@@ -334,7 +344,7 @@ on a parser that demonstrates parsing the "a" there - it's time to think about p
 we'll call a "vessel." Or, since we're using Java, a `Vessel` - which we'll encapsulate in an `Enum` so we can
 easily add `Vessel`s.
 
-The `Enum` itself is pretty simple:
+The `Vessel` itself is pretty simple:
 
     package com.autumncode.bartender;
 
@@ -410,7 +420,8 @@ from `Vessel`. It's marked `final static` so it will only initialize that `List`
 }</pre>
 
  The idiom that Grappa uses - and that I will use, in any event - involves the use of the 
- `push()` and `match()` methods.
+ [`push()`](http://fge.github.io/com/github/fge/grappa/parsers/BaseActions.html#push(V)) and 
+ [`match()`](http://fge.github.io/com/github/fge/grappa/parsers/BaseActions.html#match()) methods.
  
  Basically, when we match a `Vessel` - using that handy `vessel()` rule - what we will do is
  `push()` a value corresponding the the `Vessel` whose name corresponds to the `Rule` we just wrote. 
@@ -471,7 +482,9 @@ named `parser.vessel()`, and the one that updates the parser's value stack is `p
 > This is a personal idiom. I reserve the right to change my mind if sanity demands it.
 
 So what this does is very similar to our prior test - except it also tests the value on the parser's stack 
-(accessed via `result.getTopStackValue()`) against the value that our `DataProvider` says should be returned,
+(accessed via 
+<code>result.<a href="http://fge.github.io/com/github/fge/grappa/run/ParsingResult.html#getTopStackValue()">getTopStackValue()</a></code>) 
+against the value that our `DataProvider` says should be returned,
 as long as the parse was expected to be valid.
 
 All this is well and good - we can hand it `"glass"` and get `Vessel.GLASS` -- but we haven't fulfilled 
@@ -533,7 +546,7 @@ First, we added our `article()` `Rule`, from our `ArticleParser`. It might be te
  It's the `ARTICLEVESSEL()` `Rule` that's fascinating. What that is describing is a sequence, consisting of:
  
  * Perhaps some whitespace, expressed as `zeroOrMore(wsp())`.
- * An optional sequence, consisting of:
+ * An [optional](http://fge.github.io/com/github/fge/grappa/parsers/BaseParser.html#optional(java.lang.Object)) sequence, consisting of:
      * An article.
      * At least one whitespace character.
  * A vessel (which, since we're using `VESSEL()`, means the parser's stack is updated.)
@@ -725,7 +738,9 @@ of it and then break it down:
 We're reusing the mechanism for creating a collection of `Vessel` references. We're also repeating the
 `Rule` used to detect an article.
 
-We're adding a `Rule` for the detection of the preposition "of", which is a mandatory element in our grammar:
+We're adding a `Rule` for the detection of the preposition "of", which is a mandatory element in our grammar. 
+We use [`ignoreCase()`](http://fge.github.io/com/github/fge/grappa/parsers/BaseParser.html#ignoreCase(java.lang.String)), 
+because we respect the rights of drunkards to shout at their barkeeps:
 
     public Rule OF() {
         return
@@ -754,7 +769,9 @@ I'm also creating methods to mutate the parser state:
         return true;
     }
 
-These are a little interesting, in that they use `peek()`. The actual base rule in our grammar 
+These are a little interesting, in that they use 
+[`peek()`](http://fge.github.io/com/github/fge/grappa/parsers/BaseActions.html#peek()). 
+The actual base rule in our grammar 
 is `DRINKORDER()`, which *immediately* pushes a `DrinkOrder` reference onto the parser stack. That means
 that there is a `DrinkOrder` that other rules can modify at will; `peek()` gives us that reference. Since it's
 typed, through Java's generics, we can call any method that `DrinkOrder` exposes.
