@@ -203,21 +203,69 @@ trailing spaces - the grammar will fail if any content exists besides our articl
 We can show that with a new test:
 
 <pre>@DataProvider
- Object[][] articleTerminalData() {
-     return new Object[][]{
-             {"a", true},
-             {"an", true},
-             {"the", true},
-             {"me", false},
-             {"THE", true},
-             {" a", false},
-             {"a ", false},
-             {"afoo", false},
-     };
- }
+Object[][] articleTerminalData() {
+    return new Object[][]{
+         {"a", true},
+         {"an", true},
+         {"the", true},
+         {"me", false},
+         {"THE", true},
+         {" a", false},
+         {"a ", false},
+         {"afoo", false},
+    };
+}
+
+@Test(dataProvider = "articleTerminalData")
+public void testArticleTerminal(String article, boolean status) {
+ testArticleGrammar(article, status, parser.articleTerminal());
+}</pre>
  
- @Test(dataProvider = "articleTerminalData")
- public void testArticleTerminal(String article, boolean status) {
-     testArticleGrammar(article, status, parser.articleTerminal());
- }</pre>
+Now our test performs as we'd expect: it matches the article, and *only* the article - as soon as 
+it has a single article, it expects the end of input. If it doesn't find that sequence, exactly, it fails
+to match and `isSuccess()` returns `false`.
+
+It's not really very kind for us to not accept whitespace, though: we probably want to parse `" a "` 
+as a valid article, but not `" a the"` or anything like that.
+
+It shouldn't be very surprising that we can use `sequence()` for that, too, along with a few new 
+rules from Grappa itself. Here's our `Rule` for articles with surrounding whitespace:
+  
+    public Rule articleWithWhitespace() {
+        return sequence(
+                zeroOrMore(wsp()),
+                article(),
+                zeroOrMore(wsp()),
+                EOI
+        );
+    }
+
+What we've done is added two extra parsing rules, around our `article()` rule: `zeroOrMore(wsp())`.
+The `wsp()` rule matches whitespace - spaces and tabs, for example. The `zeroOrMore()` rule seems
+faintly self-explanatory, but just in case: it says "this rule will match if zero or more of the 
+*contained* rules match."
+ 
+ Therefore, our new rule will match however much whitespace we have before an article, then the article, 
+ and then any whitespace *after* the article - but nothing else. That's fun to say, I guess, but it's
+ a lot more fun to show:
+ 
+     @DataProvider
+     Object[][] articleWithWhitespaceData() {
+         return new Object[][]{
+                 {"a", true},
+                 {"a      ", true},
+                 {"     the", true},
+                 {"me", false},
+                 {" THE ", true},
+                 {" a an the ", false},
+                 {"afoo", false},
+         };
+     }
+     
+     @Test(dataProvider = "articleWithWhitespaceData")
+     public void testArticleWithWhitespace(String article, boolean status) {
+         testArticleGrammar(article, status, parser.articleWithWhitespace());
+     }
+
+
 

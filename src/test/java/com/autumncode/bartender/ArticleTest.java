@@ -57,7 +57,7 @@ public class ArticleTest {
 
     @Test(dataProvider = "fullArticleData")
     public void testARTICLE(String article, boolean status) {
-        testArticleGrammar(article, status, parser.ARTICLE());
+        testArticleGrammar(article, status, parser.articleWithWhitespace());
     }
 
     @DataProvider
@@ -78,4 +78,23 @@ public class ArticleTest {
     public void testArticleTerminal(String article, boolean status) {
         testArticleGrammar(article, status, parser.articleTerminal());
     }
+
+    @DataProvider
+    Object[][] articleWithWhitespaceData() {
+        return new Object[][]{
+                {"a", true},
+                {"a      ", true},
+                {"     the", true},
+                {"me", false},
+                {" THE ", true},
+                {" a an the ", false},
+                {"afoo", false},
+        };
+    }
+
+    @Test(dataProvider = "articleWithWhitespaceData")
+    public void testArticleWithWhitespace(String article, boolean status) {
+        testArticleGrammar(article, status, parser.articleWithWhitespace());
+    }
+
 }

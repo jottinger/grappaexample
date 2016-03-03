@@ -15,10 +15,12 @@ public class ArticleParser extends BaseParser<Void> {
         );
     }
 
-    public Rule ARTICLE() {
-        return sequence(zeroOrMore(wsp()),
+    public Rule articleWithWhitespace() {
+        return sequence(
+                zeroOrMore(wsp()),
                 article(),
                 zeroOrMore(wsp()),
-                EOI);
+                EOI
+        );
     }
 }
