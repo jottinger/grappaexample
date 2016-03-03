@@ -1,11 +1,10 @@
-package com.autumncode.javabot.grammar;
+package com.autumncode.bartender;
 
+import com.autumncode.bartender.Vessel;
 import com.github.fge.grappa.parsers.BaseParser;
 import com.github.fge.grappa.rules.Rule;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

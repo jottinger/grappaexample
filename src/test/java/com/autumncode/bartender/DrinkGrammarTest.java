@@ -1,4 +1,4 @@
-package com.autumncode.javabot.grammar;
+package com.autumncode.bartender;
 
 import com.github.fge.grappa.Grappa;
 import com.github.fge.grappa.run.ListeningParseRunner;
@@ -77,5 +77,13 @@ public class DrinkGrammarTest {
         assertTrue(order.isSuccess());
         assertEquals(order.getTopStackValue().vessel, Vessel.PINT);
         assertEquals(order.getTopStackValue().description, "duck vomit");
+    }
+    @Test
+    public void testNothingThanks() {
+        DrinkOrderParser parser = Grappa.createParser(DrinkOrderParser.class);
+        ListeningParseRunner<DrinkOrder> runner = new ListeningParseRunner<>(parser.DRINKORDER());
+        ParsingResult<DrinkOrder> order = runner.run("nothing");
+        assertTrue(order.isSuccess());
+        assertTrue(order.getTopStackValue().isTerminal());
     }
 }

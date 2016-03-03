@@ -1,4 +1,4 @@
-package com.autumncode.javabot.grammar;
+package com.autumncode.bartender;
 
 public enum Vessel {
     PINT,
