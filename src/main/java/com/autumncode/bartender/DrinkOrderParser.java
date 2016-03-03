@@ -13,22 +13,19 @@ public class DrinkOrderParser extends BaseParser<DrinkOrder> {
             .map(Enum::name)
             .collect(Collectors.toList());
 
-    public boolean assignDrink() {
+    protected boolean assignDrink() {
         peek().setDescription(match().toLowerCase().replaceAll("\\s+", " "));
         return true;
     }
 
-    public boolean setTerminal() {
-        peek().setTerminal(true);
+    protected boolean assignVessel() {
+        peek().setVessel(Vessel.valueOf(match().toUpperCase()));
         return true;
     }
 
-    public Rule NOTHING() {
-        return sequence(
-                trieIgnoreCase("nothing", "nada", "zilch", "done"),
-                setTerminal(),
-                EOI
-        );
+    protected boolean setTerminal() {
+        peek().setTerminal(true);
+        return true;
     }
 
     public Rule ARTICLE() {
@@ -40,10 +37,19 @@ public class DrinkOrderParser extends BaseParser<DrinkOrder> {
                 ignoreCase("of");
     }
 
+    public Rule NOTHING() {
+        return sequence(
+                trieIgnoreCase("nothing", "nada", "zilch", "done"),
+                setTerminal(),
+                EOI
+        );
+    }
 
-    public boolean assignVessel() {
-        peek().setVessel(Vessel.valueOf(match().toUpperCase()));
-        return true;
+    public Rule VESSEL() {
+        return sequence(
+                trieIgnoreCase(vessels),
+                assignVessel()
+        );
     }
 
     public Rule DRINK() {
@@ -52,13 +58,6 @@ public class DrinkOrderParser extends BaseParser<DrinkOrder> {
                         .using(oneOrMore(wsp()))
                         .min(1),
                 assignDrink()
-        );
-    }
-
-    public Rule vesselType() {
-        return sequence(
-                trieIgnoreCase(vessels),
-                assignVessel()
         );
     }
 
@@ -73,7 +72,7 @@ public class DrinkOrderParser extends BaseParser<DrinkOrder> {
                                         ARTICLE(),
                                         oneOrMore(wsp())
                                 )),
-                                vesselType(),
+                                VESSEL(),
                                 oneOrMore(wsp()),
                                 OF(),
                                 oneOrMore(wsp()),

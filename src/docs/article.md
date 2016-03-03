@@ -606,7 +606,8 @@ Most of this should be fairly simple; it's the same pattern we've seen used in o
 selling a beer called "Old 66," and
 in my imagination "duck vomit" is the kind of wine that comes in a resealable plastic bag.
 
-A lot of the `DrinkOrderParser` will be very familiar. Let's take a look at *all* of it and then break it down:
+A lot of the `DrinkOrderParser` will be very familiar. Let's dive in and take a look at *all* 
+of it and then break it down:
 
 <pre>public class DrinkOrderParser extends BaseParser&lt;DrinkOrder&gt; {
     Collection&lt;String&gt; vessels = Stream
@@ -619,17 +620,14 @@ A lot of the `DrinkOrderParser` will be very familiar. Let's take a look at *all
         return true;
     }
 
-    public boolean setTerminal() {
-        peek().setTerminal(true);
+    public boolean assignVessel() {
+        peek().setVessel(Vessel.valueOf(match().toUpperCase()));
         return true;
     }
 
-    public Rule NOTHING() {
-        return sequence(
-                trieIgnoreCase("nothing", "nada", "zilch", "done"),
-                setTerminal(),
-                EOI
-        );
+    public boolean setTerminal() {
+        peek().setTerminal(true);
+        return true;
     }
 
     public Rule ARTICLE() {
@@ -641,10 +639,19 @@ A lot of the `DrinkOrderParser` will be very familiar. Let's take a look at *all
                 ignoreCase("of");
     }
 
+    public Rule NOTHING() {
+        return sequence(
+                trieIgnoreCase("nothing", "nada", "zilch", "done"),
+                setTerminal(),
+                EOI
+        );
+    }
 
-    public boolean assignVessel() {
-        peek().setVessel(Vessel.valueOf(match().toUpperCase()));
-        return true;
+    public Rule VESSEL() {
+        return sequence(
+                trieIgnoreCase(vessels),
+                assignVessel()
+        );
     }
 
     public Rule DRINK() {
@@ -653,13 +660,6 @@ A lot of the `DrinkOrderParser` will be very familiar. Let's take a look at *all
                         .using(oneOrMore(wsp()))
                         .min(1),
                 assignDrink()
-        );
-    }
-
-    public Rule vesselType() {
-        return sequence(
-                trieIgnoreCase(vessels),
-                assignVessel()
         );
     }
 
@@ -674,7 +674,7 @@ A lot of the `DrinkOrderParser` will be very familiar. Let's take a look at *all
                                         ARTICLE(),
                                         oneOrMore(wsp())
                                 )),
-                                vesselType(),
+                                VESSEL(),
                                 oneOrMore(wsp()),
                                 OF(),
                                 oneOrMore(wsp()),
@@ -686,3 +686,60 @@ A lot of the `DrinkOrderParser` will be very familiar. Let's take a look at *all
         );
     }
 }</pre>
+
+We're reusing the mechanism for creating a collection of `Vessel` references. We're also repeating the
+`Rule` used to detect an article.
+
+We're adding a `Rule` for the detection of the preposition "of", which is a mandatory element in our grammar:
+
+    public Rule OF() {
+        return
+                ignoreCase("of");
+    }
+
+> Note how I'm skirting my own rule about naming. I said I was reserving the right to change my mind, 
+and apparently I've done so even while writing this article. According to the naming convention I
+described earlier, it should be `of()` and not `OF()` because it doesn't alter the parser's stack. The same
+rule applies to `ARTICLE()`. It's my content, I'll write it how I want to unless I decide to fix it later.
+
+I'm also creating methods to mutate the parser state:
+
+    protected boolean assignDrink() {
+        peek().setDescription(match().toLowerCase().replaceAll("\\s+", " "));
+        return true;
+    }
+
+    protected boolean assignVessel() {
+        peek().setVessel(Vessel.valueOf(match().toUpperCase()));
+        return true;
+    }
+
+    protected boolean setTerminal() {
+        peek().setTerminal(true);
+        return true;
+    }
+
+These are a little interesting, in that they use `peek()`. The actual base rule in our grammar 
+is `DRINKORDER()`, which *immediately* pushes a `DrinkOrder` reference onto the parser stack. That means
+that there is a `DrinkOrder` that other rules can modify at will; `peek()` gives us that reference. Since it's
+typed, through Java's generics, we can call any method that `DrinkOrder` exposes.
+
+These utilities all return `true`. None of them can fail, because they won't be called unless a prior rule 
+has matched; these methods are for convenience only.  Actually, let's show the `NOTHING()` and 
+`VESSEL()` rules, so we can see how these methods are invoked:
+
+    public Rule NOTHING() {
+        return sequence(
+                trieIgnoreCase("nothing", "nada", "zilch", "done"),
+                setTerminal(),
+                EOI
+        );
+    }
+
+    public Rule VESSEL() {
+        return sequence(
+                trieIgnoreCase(vessels),
+                assignVessel()
+        );
+    }
+
