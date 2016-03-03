@@ -279,4 +279,7 @@ sure that 4ms reading is an outlier. Our grammar isn't complex, and I imagine we
 *without* a grammar that would be faster - maybe <code>HashSet&lt;String&gt;.contains(input.trim())</code> -
 but we're about to step into territory that would end up being a lot less maintainable as our grammar grows.
 
+> I ran the tests one hundred times each and the same pattern showed up: 
+  every now and then you'd see a test that ran slower. My initial guess is that this is related 
+  to garbage collection or some other housekeeping chore on the JVM's part, but I haven't verified it.)
 
