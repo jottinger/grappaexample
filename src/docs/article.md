@@ -554,7 +554,12 @@ return done;</pre>
       
 I'm actually using Lombok in the project (and the `@Data` annotation) but for the sake of example, 
 imagine that we have the standard boilerplate accesors and mutators for each of those attributes.
-Thus, we can call `setDescription()`, et al, even though we're not showing that code.
+Thus, we can call `setDescription()`, et al, even though we're not showing that code. We're also going to have
+`equals()` and `hashCode()` created (via Lombok), as well as a no-argument constructor and another constructor
+for all properties. 
+
+In other words, it's a fairly standard Javabean, but we're not showing all the the boilerplate code - and thanks
+to Lombok, we don't even *need* the boilerplate code. Lombok makes it for us.
  
  > If you *need* that code shown, you may be reading the wrong tutorial. 
  How did you make it this far?

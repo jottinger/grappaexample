@@ -27,24 +27,24 @@ public class Bartender {
     }
 
     private boolean handleOrder(String order) {
-    DrinkOrderParser parser
-            = Grappa.createParser(DrinkOrderParser.class);
-    ListeningParseRunner<DrinkOrder> runner
-            = new ListeningParseRunner<>(parser.DRINKORDER());
-    ParsingResult<DrinkOrder> result = runner.run(order);
-    DrinkOrder drinkOrder;
-    boolean done = false;
-    if (result.isSuccess()) {
-        drinkOrder = result.getTopStackValue();
-        done = drinkOrder.isTerminal();
-        if (!done) {
-            System.out.printf("Here's your %s of %s. Please drink responsibly!%n",
-                    drinkOrder.getVessel().toString().toLowerCase(),
-                    drinkOrder.getDescription());
+        DrinkOrderParser parser
+                = Grappa.createParser(DrinkOrderParser.class);
+        ListeningParseRunner<DrinkOrder> runner
+                = new ListeningParseRunner<>(parser.DRINKORDER());
+        ParsingResult<DrinkOrder> result = runner.run(order);
+        DrinkOrder drinkOrder;
+        boolean done = false;
+        if (result.isSuccess()) {
+            drinkOrder = result.getTopStackValue();
+            done = drinkOrder.isTerminal();
+            if (!done) {
+                System.out.printf("Here's your %s of %s. Please drink responsibly!%n",
+                        drinkOrder.getVessel().toString().toLowerCase(),
+                        drinkOrder.getDescription());
+            }
+        } else {
+            System.out.println("I'm sorry, I don't understand. Try again?");
         }
-    } else {
-        System.out.println("I'm sorry, I don't understand. Try again?");
-    }
-    return done;
+        return done;
     }
 }
