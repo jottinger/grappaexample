@@ -24,4 +24,21 @@ public class VesselParser extends BaseParser<Vessel> {
                 push(Vessel.valueOf(match().toUpperCase()))
         );
     }
+
+    public Rule article() {
+        return trieIgnoreCase("a", "an", "the");
+    }
+
+    public Rule ARTICLEVESSEL() {
+        return sequence(
+                zeroOrMore(wsp()),
+                optional(
+                        sequence(
+                                article(),
+                                oneOrMore(wsp())
+                        )),
+                VESSEL(),
+                zeroOrMore(wsp()),
+                EOI);
+    }
 }

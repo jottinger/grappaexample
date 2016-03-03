@@ -438,3 +438,77 @@ named `parser.vessel()`, and the one that updates the parser's value stack is `p
 So what this does is very similar to our prior test - except it also tests the value on the parser's stack 
 (accessed via `result.getTopStackValue()`) against the value that our `DataProvider` says should be returned,
 as long as the parse was expected to be valid.
+
+All this is well and good - we can hand it `"glass"` and get `Vessel.GLASS` -- but we haven't fulfilled 
+everything we want out of a `VesselParser`. We want to be able to ask for `"   a pint "` -- 
+note the whitespace! -- and get `Vessel.PINT`. We need to add in our article parsing.
+
+First, let's write our tests, so we know when we're done:
+
+    @DataProvider
+    Object[][] articleVesselReturnData() {
+        return new Object[][]{
+                {"a pint", true, Vessel.PINT},
+                {"the bowl", true, Vessel.BOWL},
+                {"  an glass", true, Vessel.GLASS},
+                {"a     cup", true, Vessel.CUP},
+                {"the pitcher    ", true, Vessel.PITCHER},
+                {" a an magnum", false, null},
+                {"bottle", true, Vessel.BOTTLE},
+                {"spoon   ", true, Vessel.SPOON},
+                {"spoon  bottle ", false, null},
+                {"hatful", false, null},
+                {"the stein", false, null},
+        };
+    }
+
+    @Test(dataProvider = "articleVesselReturnData")
+    public void testArticleVesselResult(String corpus, boolean valid, Vessel value) {
+        testGrammarResult(corpus, valid, value, parser.ARTICLEVESSEL());
+    }
+
+Our tests should be able to ignore the leading article and any whitespace. Any wrongful formation 
+(as you see in `" a an magnum"`) should fail, and any vessel type that isn't valid (`"hatful"` and
+`"the stein"`) should fail.
+
+Our `Rule` is going to *look like* a monster, because it has to handle a set of possibilities, but
+ it's actually pretty simple. Let's take a look, then walk through the grammar:
+ 
+    public Rule article() {
+        return trieIgnoreCase("a", "an", "the");
+    }
+
+    public Rule ARTICLEVESSEL() {
+        return sequence(
+                zeroOrMore(wsp()),
+                optional(
+                        sequence(
+                                article(),
+                                oneOrMore(wsp())
+                        )),
+                VESSEL(),
+                zeroOrMore(wsp()),
+                EOI);
+    }
+
+First, we added our `article()` `Rule`, from our `ArticleParser`. It might be tempting to copy all the whitespace
+ handling from that parser as well, but we shouldn't - all we care about is the articles themselves 
+ ("lexemes," if we're trying to look all nerdy.) 
+ 
+ It's the `ARTICLEVESSEL()` `Rule` that's fascinating. What that is describing is a sequence, consisting of:
+ 
+ * Perhaps some whitespace, expressed as `zeroOrMore(wsp())`.
+ * An optional sequence, consisting of:
+     * An article.
+     * At least one whitespace character.
+ * A vessel (which, since we're using `VESSEL()`, means the parser's stack is updated.)
+ * Perhaps some whitespace.
+ * The end of input.
+ 
+ Any input that can't follow that exact sequence (`"spoon bottle"`, for example) fails.
+ 
+ Believe it or not, we're now very much on the downhill slide for our bar-tending AI.
+ 
+ We need to add a preposition ("of") and then generalized text handling for the type of drink, and we need to
+ add the container type - but of this, only the type of drink will add any actual complexity to our parser.
+ 

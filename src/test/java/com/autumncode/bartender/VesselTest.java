@@ -72,4 +72,25 @@ public class VesselTest {
     public void testSimpleVesselResult(String corpus, boolean valid, Vessel value) {
         testGrammarResult(corpus, valid, value, parser.VESSEL());
     }
+
+    @DataProvider
+    Object[][] articleVesselReturnData() {
+        return new Object[][]{
+                {"a pint", true, Vessel.PINT},
+                {"the bowl", true, Vessel.BOWL},
+                {"  an glass", true, Vessel.GLASS},
+                {"a     cup", true, Vessel.CUP},
+                {"the pitcher    ", true, Vessel.PITCHER},
+                {" a an magnum", false, null},
+                {"bottle", true, Vessel.BOTTLE},
+                {"spoon   ", true, Vessel.SPOON},
+                {"spoon  bottle ", false, null},
+                {"hatful", false, null},
+        };
+    }
+
+    @Test(dataProvider = "articleVesselReturnData")
+    public void testArticleVesselResult(String corpus, boolean valid, Vessel value) {
+        testGrammarResult(corpus, valid, value, parser.ARTICLEVESSEL());
+    }
 }
