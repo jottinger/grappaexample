@@ -12,7 +12,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 public class DrinkOrderParserTest {
-    DrinkOrderParser parser=Grappa.createParser(DrinkOrderParser.class);
+    DrinkOrderParser parser = Grappa.createParser(DrinkOrderParser.class);
 
     private void testGrammarResult(String corpus, boolean status, DrinkOrder value, Rule rule) {
         ListeningParseRunner<DrinkOrder> runner

@@ -565,4 +565,122 @@ to Lombok, we don't even *need* the boilerplate code. Lombok makes it for us.
  constructors shown, you may be reading the wrong tutorial. How did you make it this far?
  
 Before we dig into the parser - which has only one really interesting addition to the things we've seen so far - 
-let's take a look at our test.
+let's take a look at our test. This is the *full* test, so it's longer than some of our code has been. 
+The `DrinkOrderParser` will be much longer.
+
+<pre>public class DrinkOrderParserTest {
+    DrinkOrderParser parser = Grappa.createParser(DrinkOrderParser.class);
+    
+    private void testGrammarResult(String corpus, boolean status, DrinkOrder value, Rule rule) {
+        ListeningParseRunner<DrinkOrder> runner
+                = new ListeningParseRunner<>(rule);
+        ParsingResult<DrinkOrder> result = runner.run(corpus);
+        assertEquals(result.isSuccess(), status,
+                "failed check on " + corpus + ", parse result was "
+                        + result + " and expected " + status);
+        if (result.isSuccess()) {
+            assertEquals(result.getTopStackValue(), value);
+        }
+    }
+    
+    @DataProvider
+    public Object[][] drinkOrderProvider() {
+        return new Object[][]{
+                {"a glass of water", true, new DrinkOrder(Vessel.GLASS, "water", false)},
+                {"a pitcher of old 66", true, new DrinkOrder(Vessel.PITCHER, "old 66", false)},
+                {"a    pint  of duck   vomit   ", true, new DrinkOrder(Vessel.PINT, "duck vomit", false)},
+                {"a shoeful of motor oil", false, null},
+                {"nothing", true, new DrinkOrder(null, null, true)},
+        };
+    }
+    
+    @Test(dataProvider = "drinkOrderProvider")
+    public void testDrinkOrderParser(String corpus, boolean valid, DrinkOrder result) {
+        testGrammarResult(corpus, valid, result, parser.DRINKORDER());
+    }
+}</pre>
+
+> I don't actually drink, myself, so... I keep imagining some biker bar in the American southwest 
+selling a beer called "Old 66," and
+in my imagination "duck vomit" is the kind of wine that comes in a resealable plastic bag.
+
+A lot of the `DrinkOrderParser` will be very familiar. Let's take a look at *all* of it and then break it down:
+
+<pre>public class DrinkOrderParser extends BaseParser&lt;DrinkOrder&gt; {
+    Collection&lt;String&gt; vessels = Stream
+            .of(Vessel.values())
+            .map(Enum::name)
+            .collect(Collectors.toList());
+
+    public boolean assignDrink() {
+        peek().setDescription(match().toLowerCase().replaceAll("\\s+", " "));
+        return true;
+    }
+
+    public boolean setTerminal() {
+        peek().setTerminal(true);
+        return true;
+    }
+
+    public Rule NOTHING() {
+        return sequence(
+                trieIgnoreCase("nothing", "nada", "zilch", "done"),
+                setTerminal(),
+                EOI
+        );
+    }
+
+    public Rule ARTICLE() {
+        return trieIgnoreCase("a", "an", "the");
+    }
+
+    public Rule OF() {
+        return
+                ignoreCase("of");
+    }
+
+
+    public boolean assignVessel() {
+        peek().setVessel(Vessel.valueOf(match().toUpperCase()));
+        return true;
+    }
+
+    public Rule DRINK() {
+        return sequence(
+                join(oneOrMore(firstOf(alpha(), digit())))
+                        .using(oneOrMore(wsp()))
+                        .min(1),
+                assignDrink()
+        );
+    }
+
+    public Rule vesselType() {
+        return sequence(
+                trieIgnoreCase(vessels),
+                assignVessel()
+        );
+    }
+
+    public Rule DRINKORDER() {
+        return sequence(
+                push(new DrinkOrder()),
+                zeroOrMore(wsp()),
+                firstOf(
+                        NOTHING(),
+                        sequence(
+                                optional(sequence(
+                                        ARTICLE(),
+                                        oneOrMore(wsp())
+                                )),
+                                vesselType(),
+                                oneOrMore(wsp()),
+                                OF(),
+                                oneOrMore(wsp()),
+                                DRINK()
+                        )
+                ),
+                zeroOrMore(wsp()),
+                EOI
+        );
+    }
+}</pre>
