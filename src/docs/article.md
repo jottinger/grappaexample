@@ -301,7 +301,7 @@ easily add `Vessel`s.
 
 The `Enum` itself is pretty simple:
 
-package com.autumncode.bartender;
+    package com.autumncode.bartender;
 
     public enum Vessel {
         PINT,
