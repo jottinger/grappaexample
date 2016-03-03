@@ -119,10 +119,9 @@ Therefore, our `ArticleParser`'s declaration will be:
 
 We need to add a `Rule` to our parser, so that we can define an entry point from 
 which the parser should begin. As a first stab, we'll create a `Rule` 
-called `article()`, that tries to match one of our words.
+called `article()`, that tries to match one of our words. With a trie. It's cute that way. 
 
-> It tries to match one of our words. With a trie. It's cute that way. (A 
-[trie](https://en.wikipedia.org/wiki/Trie) is a type of radix tree. 
+> A [trie](https://en.wikipedia.org/wiki/Trie) is a type of radix tree. 
 They tend to be super-fast at certain kinds of classifications. Note that this method name may 
 change in later versions of Grappa, because honestly, the actual search mechanism - the trie - 
 isn't important for the purpose of invoking the method.)
