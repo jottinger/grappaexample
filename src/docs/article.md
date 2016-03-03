@@ -600,6 +600,8 @@ The `DrinkOrderParser` will be much longer.
     }
 }</pre>
 
+Most of this should be fairly simple; it's the same pattern we've seen used in our other tests.
+
 > I don't actually drink, myself, so... I keep imagining some biker bar in the American southwest 
 selling a beer called "Old 66," and
 in my imagination "duck vomit" is the kind of wine that comes in a resealable plastic bag.
