@@ -505,7 +505,7 @@ First, we added our `article()` `Rule`, from our `ArticleParser`. It might be te
  * Perhaps some whitespace.
  * The end of input.
  
- Any input that can't follow that exact sequence (`"spoon bottle"`, for example) fails.
+Any input that can't follow that exact sequence (`"spoon bottle"`, for example) fails.
  
  Believe it or not, we're now very much on the downhill slide for our bar-tending AI.
  
