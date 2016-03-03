@@ -294,7 +294,7 @@ describing the `ArticleParser` - this is where that information is useful!)
 Therefore, all we need to do is expose a type, and then manipulate that stack of values. We do so with a
 special type of `Rule`, a function that returns a boolean that indicates whether the `Rule` was successful.
 
-Our goal with the article is to parse drink orders, of the general form of "a glass of water." We already worked 
+Our goal with the article is to parse drink orders, of the general form of "a VESSEL of DRINK." We already worked 
 on a parser that demonstrates parsing the "a" there - it's time to think about parsing the next term, which
 we'll call a "vessel." Or, since we're using Java, a `Vessel` - which we'll encapsulate in an `Enum` so we can
 easily add `Vessel`s.
@@ -505,10 +505,58 @@ First, we added our `article()` `Rule`, from our `ArticleParser`. It might be te
  * Perhaps some whitespace.
  * The end of input.
  
-Any input that can't follow that exact sequence (`"spoon bottle"`, for example) fails.
+Any input that doesn't follow that exact sequence (`"spoon bottle"`, for example) fails.
  
  Believe it or not, we're now very much on the downhill slide for our bar-tending AI.
  
  We need to add a preposition ("of") and then generalized text handling for the type of drink, and we need to
  add the container type - but of this, only the type of drink will add any actual complexity to our parser.
+ 
+ ## Rounding out the Bartender
+ 
+ Our `VesselParser` is actually a pretty good model for the `DrinkOrderParser` that our `Bartender`
+ will use. What we need to add is matching for two extra tokens: "of," as mentioned, and then a 
+ generalized description of a drink.
+ 
+ We're not going to be picky about the description; we could validate it (just like we've done for 
+ `Vessel`) but there are actual better lessons to be gained by leaving it free-form.
+ 
+ Let's take a look at the operative part of `Bartender` again, which will set the stage for the full parser.
+ 
+<pre>DrinkOrderParser parser
+        = Grappa.createParser(DrinkOrderParser.class);
+ListeningParseRunner&lt;DrinkOrder&gt; runner
+        = new ListeningParseRunner&lt;&gt;(parser.DRINKORDER());
+ParsingResult&lt;DrinkOrder&gt; result = runner.run(order);
+DrinkOrder drinkOrder;
+boolean done = false;
+if (result.isSuccess()) {
+    drinkOrder = result.getTopStackValue();
+    done = drinkOrder.isTerminal();
+    if (!done) {
+        System.out.printf("Here's your %s of %s. Please drink responsibly!%n",
+                drinkOrder.getVessel().toString().toLowerCase(),
+                drinkOrder.getDescription());
+    }
+} else {
+    System.out.println("I'm sorry, I don't understand. Try again?");
+}
+return done;</pre>
+
+ The very first thing we're going to do is create a `DrinkOrder` class, that contains the information about
+ our drink order. 
+ 
+ <pre>public class DrinkOrder {
+    Vessel vessel;
+    String description;
+    boolean terminal;
+}</pre>
+      
+I'm actually using Lombok in the project (and the `@Data` annotation) but for the sake of example, 
+imagine that we have the standard boilerplate accesors and mutators for each of those attributes.
+Thus, we can call `setDescription()`, et al, even though we're not showing that code.
+ 
+ > If you *need* that code shown, you may be reading the wrong tutorial. 
+ How did you make it this far?
+ 
  

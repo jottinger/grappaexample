@@ -64,8 +64,10 @@ public class DrinkOrderParser extends BaseParser<DrinkOrder> {
                         zeroOrMore(wsp()),
                         firstOf(NOTHING(),
                                 sequence(
-                                        optional(ARTICLE()),
-                                        oneOrMore(wsp()),
+                                        optional(sequence(
+                                                ARTICLE(),
+                                                oneOrMore(wsp())
+                                        )),
                                         vesselType(),
                                         oneOrMore(wsp()),
                                         OF(),
