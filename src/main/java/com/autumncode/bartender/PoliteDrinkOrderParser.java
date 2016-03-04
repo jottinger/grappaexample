@@ -34,8 +34,16 @@ public class PoliteDrinkOrderParser extends BaseParser<DrinkOrder> {
 
     public Rule OF() {
         return firstOf(
-                COMMA(),
-                ignoreCase("of")
+                sequence(
+                        zeroOrMore(wsp()),
+                        COMMA(),
+                        zeroOrMore(wsp())
+                ),
+                sequence(
+                        oneOrMore(wsp()),
+                        ignoreCase("of"),
+                        oneOrMore(wsp())
+                )
         );
     }
 
@@ -70,9 +78,7 @@ public class PoliteDrinkOrderParser extends BaseParser<DrinkOrder> {
                         oneOrMore(wsp())
                 )),
                 VESSEL(),
-                oneOrMore(wsp()),
                 OF(),
-                oneOrMore(wsp()),
                 DRINK()
         );
     }
