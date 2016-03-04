@@ -31,6 +31,8 @@ public class PoliteDrinkOrderParserTest {
                 {"a pitcher of old 66, please", true, new DrinkOrder(Vessel.PITCHER, "old 66", false)},
                 {"a pitcher of old 66, pls", true, new DrinkOrder(Vessel.PITCHER, "old 66, pls", false)},
                 {"a    pint  of duck   vomit   ", true, new DrinkOrder(Vessel.PINT, "duck vomit", false)},
+                {"a    pint  of duck   vomit  , please ", true, new DrinkOrder(Vessel.PINT, "duck vomit", false)},
+                {" pint , duck   vomit please  ", true, new DrinkOrder(Vessel.PINT, "duck vomit", false)},
                 {"a shoeful of motor oil", false, null},
                 {"nothing", true, new DrinkOrder(null, null, true)},
         };

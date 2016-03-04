@@ -33,8 +33,10 @@ public class PoliteDrinkOrderParser extends BaseParser<DrinkOrder> {
     }
 
     public Rule OF() {
-        return
-                ignoreCase("of");
+        return firstOf(
+                COMMA(),
+                ignoreCase("of")
+        );
     }
 
     public Rule NOTHING() {
@@ -54,15 +56,11 @@ public class PoliteDrinkOrderParser extends BaseParser<DrinkOrder> {
 
     public Rule DRINK() {
         return sequence(
-                join(
-                        sequence(
-                                oneOrMore(ANY),
-                                testNot(INTERJECTION())
-                        )
-                ).using(oneOrMore(wsp()))
-                        .min(1),
+                oneOrMore(
+                        testNot(INTERJECTION()),
+                        ANY
+                ),
                 assignDrink());
-        //return join(oneOrMore(ANY, testNot(INTERJECTION())));, assignDrink());
     }
 
     public Rule DRINKORDER() {
@@ -79,10 +77,14 @@ public class PoliteDrinkOrderParser extends BaseParser<DrinkOrder> {
         );
     }
 
+    public Rule COMMA() {
+        return string(",");
+    }
+
     public Rule INTERJECTION() {
         return sequence(
                 zeroOrMore(wsp()),
-                optional(string(",")),
+                optional(COMMA()),
                 zeroOrMore(wsp()),
                 ignoreCase("please")
         );
