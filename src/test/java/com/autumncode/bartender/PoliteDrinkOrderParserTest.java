@@ -10,8 +10,6 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 public class PoliteDrinkOrderParserTest {
-    PoliteDrinkOrderParser parser = Grappa.createParser(PoliteDrinkOrderParser.class);
-
     private void testGrammarResult(String corpus, boolean status, DrinkOrder value, Rule rule) {
         ListeningParseRunner<DrinkOrder> runner
                 = new ListeningParseRunner<>(rule);
@@ -28,13 +26,15 @@ public class PoliteDrinkOrderParserTest {
     public Object[][] drinkOrderProvider() {
         return new Object[][]{
                 {"a glass of water please", true, new DrinkOrder(Vessel.GLASS, "water", false)},
+                {"glass,water,please", true, new DrinkOrder(Vessel.GLASS, "water", false)},
+                {"glass,water,please ok", true, new DrinkOrder(Vessel.GLASS, "water", false)},
                 {"a pitcher of old 66, please", true, new DrinkOrder(Vessel.PITCHER, "old 66", false)},
                 {"a pitcher of old 66", true, new DrinkOrder(Vessel.PITCHER, "old 66", false)},
                 {"a glass of pinot noir, 1986", true, new DrinkOrder(Vessel.GLASS, "pinot noir, 1986", false)},
                 {"a glass of pinot noir, 1986, ok?", true, new DrinkOrder(Vessel.GLASS, "pinot noir, 1986", false)},
                 {"glass of pinot noir, 1986, ok?", true, new DrinkOrder(Vessel.GLASS, "pinot noir, 1986", false)},
-                {"glass , pinot noir, 1986, ok?", true, new DrinkOrder(Vessel.GLASS, "pinot noir, 1986", false)},
-                {"glass,pinot noir, 1986,ok?", true, new DrinkOrder(Vessel.GLASS, "pinot noir, 1986", false)},
+                {"cup , pinot noir, 1986 vintage, ok?", true, new DrinkOrder(Vessel.CUP, "pinot noir, 1986 vintage", false)},
+                {"cup,pinot noir, 1986,ok!", true, new DrinkOrder(Vessel.CUP, "pinot noir, 1986", false)},
                 {"a    pint  of duck   vomit   ", true, new DrinkOrder(Vessel.PINT, "duck vomit", false)},
                 {"a    pint  of duck   vomit  , please ", true, new DrinkOrder(Vessel.PINT, "duck vomit", false)},
                 {" pint , duck   vomit please  ", true, new DrinkOrder(Vessel.PINT, "duck vomit", false)},
@@ -45,6 +45,7 @@ public class PoliteDrinkOrderParserTest {
 
     @Test(dataProvider = "drinkOrderProvider")
     public void testDrinkOrderParser(String corpus, boolean valid, DrinkOrder result) {
+        PoliteDrinkOrderParser parser = Grappa.createParser(PoliteDrinkOrderParser.class);
         testGrammarResult(corpus, valid, result, parser.ORDER());
     }
 }
