@@ -84,7 +84,7 @@ public class PoliteDrinkOrderParser extends BaseParser<DrinkOrder> {
     }
 
     public Rule COMMA() {
-        return string(",");
+        return ch(',');
     }
 
     public Rule INTERJECTION() {
@@ -97,7 +97,7 @@ public class PoliteDrinkOrderParser extends BaseParser<DrinkOrder> {
     }
 
     public Rule EOS() {
-        return trie(".", "!", "?");
+        return anyOf(".!?");
     }
 
     public Rule ORDER() {
