@@ -145,7 +145,7 @@ public class ArticleTest {
 
 So what is happening here?
 
-First, we create a global (for the test) `ArticleParser` instance through [`Grappa`](http://fge.github.io/com/github/fge/grappa/Grappa.html). Then, for every test, we create a [`ListeningParseRunner`](http://fge.github.io/com/github/fge/grappa/run/ListeningParseRunner.html),  with the entry point to the grammar as a parameter; this builds the internal model for the parser (stuff we don't really care about, but it *is* memoized, so we can use that code over and over again without incurring the time it takes for processing the grammar at runtime.)
+First, we create a global (for the test) `ArticleParser` instance through [`Grappa`](http://fge.github.io/com/github/fge/grappa/Grappa.html). Then, for every test, we create a [`ListeningParseRunner`](http://fge.github.io/com/github/fge/grappa/run/ListeningParseRunner.html),  with the entry point to the grammar as a parameter; this builds the internal model for the parser (stuff we don't really care about, but it *is* [memoized](https://en.wikipedia.org/wiki/Memoization), so we can use that code over and over again without incurring the time it takes for processing the grammar at runtime.)
 
 > I used a utility method because the form of the tests themselves doesn't change - only the inputs and the rules being applied. As we add more to our grammar, this will allow us to run *similar* tests with different inputs, results, and rules.
 
@@ -159,7 +159,7 @@ The leading space is easy: our parser doesn't consume any whitespace, and Grappa
 
 However, the *trailing* space (and `"afoo"`) is a little more odd. What's happening there is that Grappa is parsing as much of the input as is necessary to fulfill the grammar; once it's finished doing that, it doesn't care about anything that *follows* the grammar. So once it matches the initial text - the "`a`" - it doesn't care what the rest of the content is. It's not significant that `"foo"` follows the "`a`"; it matches the "`a`" and it's done.
 
-We can fix that, of course, by specifying a better rule - one that includes a *terminal condition*. That introduces a core concept for Grappa, the "[`sequence()`](http://fge.github.io/com/github/fge/grappa/parsers/BaseParser.html#sequence(java.lang.Object[]))."
+We can fix that, of course, by specifying a better rule - one that includes a *terminal condition*. That introduces a core concept for Grappa, the "[`sequence()`](http://fge.github.io/com/github/fge/grappa/parsers/BaseParser.html#sequence(java.lang.Object[]))." (This will factor very heavily into our grammar when we add the ability to say "please" at the end of the tutorial.)
 
 Let's expand our `ArticleParser` a little more. Now it looks like:
 
