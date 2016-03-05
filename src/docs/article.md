@@ -285,8 +285,7 @@ Given that we've said that a parser can be constructed with the "return type", t
     }
 }</string></pre>
 
-What does this do? Well, most of it is building a `List` of the `Vessel` values, by extracting the values from `Vessel`. It's marked `final static` so it will only initialize that `List` once; the 
-`Rule` (`vessel()`) simply uses the exact same technique we used in parsing articles. It doesn't actually  do anything with the match, though. It would simply fail if it was handed text that did not match a `Vessel` type.
+What does this do? Well, most of it is building a `List` of the `Vessel` values, by extracting the values from `Vessel`. It's marked `final static` so it will only initialize that `List` once; the `Rule` (`vessel()`) simply uses the exact same technique we used in parsing articles. It doesn't actually  do anything with the match, though. It would simply fail if it was handed text that did not match a `Vessel` type.
  
 Let's try it out, using the same sort of generalized pattern we saw in our `ArticleParser` tests. (We're going to add a new generalized test method, when we add in the type that should be returned, but this will do for now.)
  
