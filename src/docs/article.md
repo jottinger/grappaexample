@@ -155,11 +155,13 @@ In most cases, it's pretty straightforward, since we are indeed passing in valid
 
 There are three cases where the result might be surprising: `" a"`, `"a "`, and `"afoo"`. The whitespace is significant, for the parser; for our test, the article with a *trailing* space *passes validation*, as does "`afoo`", while the article with the *leading* space does not.
 
-The leading space is easy: our parser doesn't consume any whitespace, and Grappa assumes whitespace is significant unless told otherwise. So that space doesn't match our article;  it fails to parse, because of that.
+The leading space is easy: our parser doesn't consume any whitespace, and Grappa assumes whitespace is significant unless told otherwise (by Rules, of course.) So that space doesn't match our article;  it fails to parse, because of that.
 
 However, the *trailing* space (and `"afoo"`) is a little more odd. What's happening there is that Grappa is parsing as much of the input as is necessary to fulfill the grammar; once it's finished doing that, it doesn't care about anything that *follows* the grammar. So once it matches the initial text - the "`a`" - it doesn't care what the rest of the content is. It's not significant that `"foo"` follows the "`a`"; it matches the "`a`" and it's done.
 
 We can fix that, of course, by specifying a better rule - one that includes a *terminal condition*. That introduces a core concept for Grappa, the "[`sequence()`](http://fge.github.io/com/github/fge/grappa/parsers/BaseParser.html#sequence(java.lang.Object[]))." (This will factor very heavily into our grammar when we add the ability to say "please" at the end of the tutorial.)
+
+> Author's note: I use "terminal" to mean "ending." So a terminal *anything* is meant to indicate finality. However, a "terminal" is also used to describe something that doesn't delegate to anything else, in Grappa's terms. So for Grappa, the use of "terminal" might not be the same as *my* use of the word "terminal".
 
 Let's expand our `ArticleParser` a little more. Now it looks like:
 
