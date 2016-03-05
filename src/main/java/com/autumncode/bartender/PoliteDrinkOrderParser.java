@@ -92,8 +92,12 @@ public class PoliteDrinkOrderParser extends BaseParser<DrinkOrder> {
                 zeroOrMore(wsp()),
                 optional(COMMA()),
                 zeroOrMore(wsp()),
-                trieIgnoreCase("please", "pls", "okay", "yo", "ok")
-        );
+                trieIgnoreCase("please", "pls", "okay", "yo", "ok"),
+                zeroOrMore(wsp()),
+                optional(EOS()),
+                zeroOrMore(wsp()),
+                EOI
+                );
     }
 
     public Rule EOS() {
