@@ -27,7 +27,7 @@ public class PoliteDrinkOrderParserTest {
         return new Object[][]{
                 {"a glass of water please", true, new DrinkOrder(Vessel.GLASS, "water", false)},
                 {"glass,water,please", true, new DrinkOrder(Vessel.GLASS, "water", false)},
-                {"glass,water,please ok", true, new DrinkOrder(Vessel.GLASS, "water", false)},
+                {"glass,water,please ok", false, null},
                 {"a pitcher of old 66, please", true, new DrinkOrder(Vessel.PITCHER, "old 66", false)},
                 {"a pitcher of old 66", true, new DrinkOrder(Vessel.PITCHER, "old 66", false)},
                 {"a glass of pinot noir, 1986", true, new DrinkOrder(Vessel.GLASS, "pinot noir, 1986", false)},
