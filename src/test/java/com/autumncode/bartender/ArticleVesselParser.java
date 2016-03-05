@@ -10,7 +10,10 @@ import java.util.stream.Stream;
 
 
 public class ArticleVesselParser extends BaseParser<Vessel> {
-    Collection<String> vessels = Stream.of(Vessel.values()).map(Enum::name).collect(Collectors.toList());
+    static final Collection<String> vessels = Stream
+            .of(Vessel.values())
+            .map(Enum::name)
+            .collect(Collectors.toList());
 
     public Rule ARTICLE() {
         return sequence(

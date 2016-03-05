@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DrinkOrderParser extends BaseParser<DrinkOrder> {
-    Collection<String> vessels = Stream
+    static final Collection<String> vessels = Stream
             .of(Vessel.values())
             .map(Enum::name)
             .collect(Collectors.toList());

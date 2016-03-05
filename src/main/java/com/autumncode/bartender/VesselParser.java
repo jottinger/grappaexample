@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 
 public class VesselParser extends BaseParser<Vessel> {
-    final static Collection<String> vessels = Stream
+    static final Collection<String> vessels = Stream
             .of(Vessel.values())
             .map(Enum::name)
             .collect(Collectors.toList());
