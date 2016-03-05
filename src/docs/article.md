@@ -12,13 +12,15 @@ What I want to do is mirror a tutorial I found for ANTLR, "[ANTLR 4: using the l
 
 > That led me to Parboiled, but some Parboiled users recommended Grappa for Java, so here we are.
 
-That tutorial basically writes a parser for drink orders. 
- 
-> If you're interested, the code is on [GitHub](https://github.com), in my [grappaexample](https://github.com/jottinger/grappaexample) repository.
+That tutorial basically writes a parser for drink orders. We'll do more.
 
+## Our Bartender
+ 
 Imagine an automated bartender: "What're ya havin?"
 
-Well... let's automate that bartender, such that he can parse responses like "`A pint of beer`." We can imagine more variations on this, but we're going to center on one: we'd also like to allow our bartender to parse orders from people who're a bit too inebriated to use the introductory article: "`glass of wine`" (no `a`) should also be acceptable.
+Well... let's automate that bartender, such that he can parse responses like "`A pint of beer`." We can imagine more variations on this, but we're going to center on one, until we get near the end of the tutorial: we'd also like to allow our bartender to parse orders from people who're a bit too inebriated to use the introductory article: "`glass of wine`" (no `a`) should also be acceptable.
+
+> If you're interested, the code is on [GitHub](https://github.com), in my [grappaexample](https://github.com/jottinger/grappaexample) repository.
 
 Let's take a look at our [bartender](https://github.com/jottinger/grappaexample/blob/master/src/main/java/com/autumncode/bartender/Bartender.java)'s source code, just to set the stage for our grammar. (Actually, we'll be writing multiple grammars, because we want to take it in small pieces.)
 
@@ -91,7 +93,7 @@ Therefore, our `ArticleParser`'s declaration will be:
 
 We need to add a `Rule` to our parser, so that we can define an entry point from which the parser should begin. As a first stab, we'll create a `Rule` called `article()`, that tries to match one of our words. With a trie. It's cute that way. 
 
-> A [trie](https://en.wikipedia.org/wiki/Trie) is a type of radix tree. They tend to be super-fast at certain kinds of classifications. Note that this method name may change in later versions of Grappa, because honestly, the actual search mechanism - the trie - isn't important for the purpose of invoking the method.)
+> A [trie](https://en.wikipedia.org/wiki/Trie) is a type of radix tree. They tend to be super-fast at certain kinds of classifications. Note that this method name may change in later versions of Grappa, because honestly, the actual search mechanism - the trie - isn't important for the purpose of invoking the method.
 
 <pre>public class ArticleParser extends BaseParser&lt;Void&gt; {
     public Rule article() {
@@ -934,3 +936,11 @@ Our [PoliteBartender](https://github.com/jottinger/grappaexample/blob/master/src
     What're ya havin'? magnum,water,pls, please
     Here's your magnum of water,pls. Please drink responsibly!
     What're ya havin'? nothing
+
+## Colophon
+
+By the way, much appreciation goes to the following individuals, who helped me write this in various important ways, and in no particular order:
+
+* [Francis Galiegue](https://github.com/fge), who helped by reviwing the text, by pointing out various errors in my grammars, and by writing [Grappa](https://github.com/fge/grappa) in the first place
+* [Chris Brenton](https://github.com/ChrisBrenton), who reviewed (a lot!) and helped me tune the messaging
+* Ragnor
