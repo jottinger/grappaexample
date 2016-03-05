@@ -32,21 +32,6 @@ public class PoliteDrinkOrderParser extends BaseParser<DrinkOrder> {
         return trieIgnoreCase("a", "an", "the");
     }
 
-    public Rule OF() {
-        return firstOf(
-                sequence(
-                        zeroOrMore(wsp()),
-                        COMMA(),
-                        zeroOrMore(wsp())
-                ),
-                sequence(
-                        oneOrMore(wsp()),
-                        ignoreCase("of"),
-                        oneOrMore(wsp())
-                )
-        );
-    }
-
     public Rule NOTHING() {
         return sequence(
                 trieIgnoreCase("nothing", "nada", "zilch", "done"),
@@ -59,6 +44,21 @@ public class PoliteDrinkOrderParser extends BaseParser<DrinkOrder> {
         return sequence(
                 trieIgnoreCase(vessels),
                 assignVessel()
+        );
+    }
+
+    public Rule OF() {
+        return firstOf(
+                sequence(
+                        zeroOrMore(wsp()),
+                        COMMA(),
+                        zeroOrMore(wsp())
+                ),
+                sequence(
+                        oneOrMore(wsp()),
+                        ignoreCase("of"),
+                        oneOrMore(wsp())
+                )
         );
     }
 
@@ -93,15 +93,20 @@ public class PoliteDrinkOrderParser extends BaseParser<DrinkOrder> {
                 optional(COMMA()),
                 zeroOrMore(wsp()),
                 trieIgnoreCase("please", "pls", "okay", "yo", "ok"),
-                zeroOrMore(wsp()),
-                optional(EOS()),
-                zeroOrMore(wsp()),
-                EOI
-                );
+                TERMINAL()
+        );
     }
 
     public Rule EOS() {
         return anyOf(".!?");
+    }
+
+    public Rule TERMINAL() {
+        return sequence(zeroOrMore(wsp()),
+                optional(EOS()),
+                zeroOrMore(wsp()),
+                EOI
+        );
     }
 
     public Rule ORDER() {
@@ -110,9 +115,7 @@ public class PoliteDrinkOrderParser extends BaseParser<DrinkOrder> {
                 zeroOrMore(wsp()),
                 firstOf(DRINKORDER(), NOTHING()),
                 optional(INTERJECTION()),
-                zeroOrMore(wsp()),
-                optional(EOS()),
-                EOI
+                TERMINAL()
         );
     }
 }
