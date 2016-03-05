@@ -277,7 +277,7 @@ What we want to do is create a parser such that we can hand it "a glass" and get
 Given that we've said that a parser can be constructed with the "return type", that tells us that our `VesselParser` wants to extend <code>BaseParser&lt;Vessel&gt;</code>, and so it does. In fact, our `VesselParser` isn't even very surprising, given what we've learned from our `ArticleParser`:
 
 <pre>public class VesselParser extends BaseParser&lt;Vessel&gt; {
-    final static Collection<string> vessels = Stream
+    static final Collection&lt;String&gt; vessels = Stream
             .of(Vessel.values())
             .map(Enum::name)
             .collect(Collectors.toList());
@@ -285,9 +285,11 @@ Given that we've said that a parser can be constructed with the "return type", t
     public Rule vessel() {
         return trieIgnoreCase(vessels);
     }
-}</string></pre>
+}</pre>
 
-What does this do? Well, most of it is building a `List` of the `Vessel` values, by extracting the values from `Vessel`. It's marked `final static` so it will only initialize that `List` once; the `Rule` (`vessel()`) simply uses the exact same technique we used in parsing articles. It doesn't actually  do anything with the match, though. It would simply fail if it was handed text that did not match a `Vessel` type.
+What does this do? Well, most of it is building a `List` of the `Vessel` values, by extracting the values from `Vessel`. It's marked `static final` so it will only initialize that `List` once; the `Rule` (`vessel()`) simply uses the exact same technique we used in parsing articles. It doesn't actually  do anything with the match, though. It would simply fail if it was handed text that did not match a `Vessel` type.
+
+> Incidentally, the [Java Language Specification](https://docs.oracle.com/javase/specs/jls/se8/html/index.html) suggests the order of `static final`, in section 8.3.1, [Field Modifiers](https://docs.oracle.com/javase/specs/jls/se8/html/jls-8.html#jls-8.3.1).
  
 Let's try it out, using the same sort of generalized pattern we saw in our `ArticleParser` tests. (We're going to add a new generalized test method, when we add in the type that should be returned, but this will do for now.)
  
