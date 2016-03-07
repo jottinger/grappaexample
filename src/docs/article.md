@@ -1,4 +1,4 @@
-[Grappa](https://github.com/fge/grappa) is a parser library for Java. It's a fork of [Parboiled](https://github.com/sirthias/parboiled/wiki), which focuses more on [Scala](http://scala-lang.org) as a development environment; Grappa seems to use more Java idioms than Parboiled does.
+[Grappa](https://github.com/fge/grappa) is a parser library for Java. It's a fork of [Parboiled](https://github.com/sirthias/parboiled/wiki), which focuses more on [Scala](http://scala-lang.org) as a development environment; Grappa tries to feel more Java-like than Parboiled does.
 
 Grappa's similar in focus to other libraries like [ANTLR](http://www.antlr.org/) and [JavaCC](https://javacc.java.net/); the main advantage to using something like Grappa instead of ANTLR is in the lack of a processing phase. With ANTLR and JavaCC, you have a grammar file, which then generates a lexer and a parser in Java source code. Then you compile that generated source to get your parser.
 
@@ -930,20 +930,11 @@ Our [PoliteBartender](https://github.com/jottinger/grappaexample/blob/master/src
     What're ya havin'? magnum,water,pls, please
     Here's your magnum of water,pls. Please drink responsibly!
     What're ya havin'? nothing
-    I'm sorry, I don't understand. Try again?
-    What're ya havin'? a pint of indigo ink, please
-    Here's your pint of indigo ink. Please drink responsibly!
-    What're ya havin'? A SPOON OF DOM PERIGNON, 1986, OK?
-    Here's your spoon of dom perignon, 1986. Please drink responsibly!
-    What're ya havin'? magnum,water,pls, please
-    Here's your magnum of water,pls. Please drink responsibly!
-    What're ya havin'? nothing
     $
 
 ## Colophon
 
 By the way, much appreciation goes to the following individuals, who helped me write this in various important ways, and in no particular order:
-
 
 * [Francis Galiegue](https://github.com/fge), who helped by reviewing the text, by pointing out various errors in my grammars, and by writing [Grappa](https://github.com/fge/grappa) in the first place
 * [Chris Brenton](https://github.com/ChrisBrenton), who reviewed (a lot!) and helped me tune the messaging
