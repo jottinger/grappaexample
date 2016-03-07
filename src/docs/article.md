@@ -24,7 +24,7 @@ Well... let's automate that bartender, such that he can parse responses like "`A
 
 Let's take a look at our [bartender](https://github.com/jottinger/grappaexample/blob/master/src/main/java/com/autumncode/bartender/Bartender.java)'s source code, just to set the stage for our grammar. (Actually, we'll be writing multiple grammars, because we want to take it in small pieces.)
 
-<pre>package com.autumncode.bartender;
+<pre lang="java">package com.autumncode.bartender;
 
 import com.github.fge.grappa.Grappa;
 import com.github.fge.grappa.run.ListeningParseRunner;
@@ -114,8 +114,6 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 public class ArticleTest {
-    ArticleParser parser = Grappa.createParser(ArticleParser.class);
-    
     @DataProvider
     Object[][] articleData() {
         return new Object[][]{
@@ -132,6 +130,7 @@ public class ArticleTest {
 
     @Test(dataProvider = "articleData")
     public void testOnlyArticle(String article, boolean status) {
+        ArticleParser parser = Grappa.createParser(ArticleParser.class);
         testArticleGrammar(article, status, parser.article());
     }
     
@@ -147,11 +146,13 @@ public class ArticleTest {
 
 So what is happening here?
 
-First, we create a global (for the test) `ArticleParser` instance through [`Grappa`](http://fge.github.io/com/github/fge/grappa/Grappa.html). Then, for every test, we create a [`ListeningParseRunner`](http://fge.github.io/com/github/fge/grappa/run/ListeningParseRunner.html),  with the entry point to the grammar as a parameter; this builds the internal model for the parser (stuff we don't really care about, but it *is* [memoized](https://en.wikipedia.org/wiki/Memoization), so we can use that code over and over again without incurring the time it takes for processing the grammar at runtime.)
+First, we create a global (for the test) `ArticleParser` instance through [`Grappa`](http://fge.github.io/com/github/fge/grappa/Grappa.html). Then we create a [`ListeningParseRunner`](http://fge.github.io/com/github/fge/grappa/run/ListeningParseRunner.html),  with the entry point to the grammar as a parameter; this builds the internal model for the parser (stuff we don't really care about, but it *is* [memoized](https://en.wikipedia.org/wiki/Memoization), so we can use that code over and over again without incurring the time it takes for processing the grammar at runtime.)
 
 > I used a utility method because the form of the tests themselves doesn't change - only the inputs and the rules being applied. As we add more to our grammar, this will allow us to run *similar* tests with different inputs, results, and rules.
 
 After we've constructed our Parser's `Runner`, we do something completely surprising: we run it, with <code><a href="http://fge.github.io/com/github/fge/grappa/run/ParsingResult.html">ParsingResult</a>&lt;Void&gt; articleResult = runner.run(article);</code>. Adding in the TestNG data provider, this means we're calling our parser with every one of those articles as a test, and checking to see if the parser's validity - shown by <code>articleResult.<a href="http://fge.github.io/com/github/fge/grappa/run/ParsingResult.html#isSuccess()">isSuccess()</a></code> - matches what we expect. 
+
+> Incidentally, it occurred to me that I could ha
 
 In most cases, it's pretty straightforward, since we are indeed passing in valid articles. Where we're not, the parser says that it's not a successful parse, such as when we pass it `me`. 
 
@@ -205,6 +206,7 @@ Object[][] articleTerminalData() {
 
 @Test(dataProvider = "articleTerminalData")
 public void testArticleTerminal(String article, boolean status) {
+    ArticleParser parser = Grappa.createParser(ArticleParser.class);
     testArticleGrammar(article, status, parser.articleTerminal());
 }</pre>
  
@@ -242,6 +244,7 @@ Therefore, our new rule will match however much whitespace we have before an art
      
      @Test(dataProvider = "articleWithWhitespaceData")
      public void testArticleWithWhitespace(String article, boolean status) {
+         ArticleParser parser = Grappa.createParser(ArticleParser.class);
          testArticleGrammar(article, status, parser.articleWithWhitespace());
      }
 
@@ -296,8 +299,6 @@ What does this do? Well, most of it is building a `List` of the `Vessel` values,
 Let's try it out, using the same sort of generalized pattern we saw in our `ArticleParser` tests. (We're going to add a new generalized test method, when we add in the type that should be returned, but this will do for now.)
  
 <pre>public class VesselTest {
-    VesselParser parser = Grappa.createParser(VesselParser.class);
-
     private void testGrammar(String corpus, boolean status, Rule rule) {
         ListeningParseRunner&lt;Vessel&gt; runner
                 = new ListeningParseRunner&lt;&gt;(rule);
@@ -324,6 +325,7 @@ Let's try it out, using the same sort of generalized pattern we saw in our `Arti
 
     @Test(dataProvider = "simpleVesselParseData")
     public void testSimpleVesselParse(String corpus, boolean valid) {
+        VesselParser parser = Grappa.createParser(VesselParser.class);
         testGrammar(corpus, valid, parser.vessel());
     }
 }</pre>
@@ -375,6 +377,7 @@ Object[][] simpleVesselReturnData() {
 
 @Test(dataProvider = "simpleVesselReturnData")
 public void testSimpleVesselResult(String corpus, boolean valid, Vessel value) {
+    VesselParser parser = Grappa.createParser(VesselParser.class);
     testGrammarResult(corpus, valid, value, parser.VESSEL());
 }</pre>
 
@@ -408,6 +411,7 @@ First, let's write our tests, so we know when we're done:
 
     @Test(dataProvider = "articleVesselReturnData")
     public void testArticleVesselResult(String corpus, boolean valid, Vessel value) {
+        VesselParser parser = Grappa.createParser(VesselParser.class);
         testGrammarResult(corpus, valid, value, parser.ARTICLEVESSEL());
     }
 
@@ -488,15 +492,13 @@ The very first thing we're going to do is create a `DrinkOrder` class, that cont
       
 I'm actually using [Lombok](https://projectlombok.org/) in the project (and the `@Data` annotation) but for the sake of example, imagine that we have the standard boilerplate accessors and mutators for each of those attributes. Thus, we can call `setDescription()`, et al, even though we're not showing that code. We're also going to have `equals()` and `hashCode()` created (via Lombok), as well as a no-argument constructor and another constructor for all properties. 
 
-In other words, it's a fairly standard Javabean, but we're not showing all the the boilerplate code - and thanks to Lombok, we don't even *need* the boilerplate code. Lombok makes it for us.
+In other words, it's a fairly standard Javabean, but we're not showing all of the boilerplate code - and thanks to Lombok, we don't even *need* the boilerplate code. Lombok makes it for us.
  
 > If you do need the code for `equals()`, `hashCode()`, `toString()`, or the mutators, accessors, and constructors shown, you may be reading the wrong tutorial. How did you make it this far?
  
 Before we dig into the parser - which has only one really interesting addition to the things we've seen so far - let's take a look at our test. This is the *full* test, so it's longer than some of our code has been. The `DrinkOrderParser` will be much longer.
 
 <pre>public class DrinkOrderParserTest {
-    DrinkOrderParser parser = Grappa.createParser(DrinkOrderParser.class);
-    
     private void testGrammarResult(String corpus, boolean status, DrinkOrder value, Rule rule) {
         ListeningParseRunner&lt;DrinkOrder&gt; runner
                 = new ListeningParseRunner&lt;&gt;(rule);
@@ -522,6 +524,7 @@ Before we dig into the parser - which has only one really interesting addition t
     
     @Test(dataProvider = "drinkOrderProvider")
     public void testDrinkOrderParser(String corpus, boolean valid, DrinkOrder result) {
+        DrinkOrderParser parser = Grappa.createParser(DrinkOrderParser.class);
         testGrammarResult(corpus, valid, result, parser.DRINKORDER());
     }
 }</pre>
@@ -558,15 +561,14 @@ A lot of the `DrinkOrderParser` will be very familiar. Let's dive in and take a 
     }
 
     public Rule OF() {
-        return
-                ignoreCase("of");
+        return ignoreCase("of");
     }
 
     public Rule NOTHING() {
         return sequence(
                 trieIgnoreCase("nothing", "nada", "zilch", "done"),
-                setTerminal(),
-                EOI
+                EOI,
+                setTerminal()
         );
     }
 
@@ -593,10 +595,10 @@ A lot of the `DrinkOrderParser` will be very familiar. Let's dive in and take a 
                 firstOf(
                         NOTHING(),
                         sequence(
-                                optional(sequence(
+                                optional
                                         ARTICLE(),
                                         oneOrMore(wsp())
-                                )),
+                                ),
                                 VESSEL(),
                                 oneOrMore(wsp()),
                                 OF(),
@@ -615,8 +617,7 @@ We're reusing the mechanism for creating a collection of `Vessel` references. We
 We're adding a `Rule` for the detection of the preposition "of", which is a mandatory element in our grammar. We use [`ignoreCase()`](http://fge.github.io/com/github/fge/grappa/parsers/BaseParser.html#ignoreCase(java.lang.String)), because we respect the rights of drunkards to shout at their barkeeps:
 
     public Rule OF() {
-        return
-                ignoreCase("of");
+        return ignoreCase("of");
     }
 
 > Note how I'm skirting my own rule about naming. I said I was reserving the right to change my mind, and apparently I've done so even while writing this article. According to the naming convention I described earlier, it should be `of()` and not `OF()` because it doesn't alter the parser's stack. The same rule applies to `ARTICLE()`. It's my content, I'll write it how I want to unless I decide to fix it later.
@@ -645,8 +646,8 @@ These utilities all return `true`. None of them can fail, because they won't be 
     public Rule NOTHING() {
         return sequence(
                 trieIgnoreCase("nothing", "nada", "zilch", "done"),
+                EOI,
                 setTerminal(),
-                EOI
         );
     }
 
@@ -729,6 +730,7 @@ All this has been great, so far. We can actually "order" from a `Bartender`, giv
     What're ya havin'? a pint of indigo ink
     Here's your pint of indigo ink. Please drink responsibly!
     What're ya havin'? nothing
+    $
 
 The only problem is that it's not very humane or polite. We can't say "please," we can't be very flexible. What we need is to add [politesse](http://www.merriam-webster.com/dictionary/politesse) to our grammar.
 
@@ -916,7 +918,7 @@ Our bartender's a great guy, but he likes his grammar.
 
 Our [PoliteBartender](https://github.com/jottinger/grappaexample/blob/master/src/main/java/com/autumncode/bartender/PoliteBartender.java) class is different from our [Bartender](https://github.com/jottinger/grappaexample/blob/master/src/main/java/com/autumncode/bartender/Bartender.java) only in the [Parser](https://github.com/jottinger/grappaexample/blob/master/src/main/java/com/autumncode/bartender/PoliteBartender.java#L30) it uses and the originating [Rule](https://github.com/jottinger/grappaexample/blob/master/src/main/java/com/autumncode/bartender/PoliteBartender.java#L33) - and, of course, in the flexibility of the orders it accepts.
 
-    java -cp bartender-1.0-SNAPSHOT.jar com.autumncode.bartender.PoliteBartender
+    $ java -cp bartender-1.0-SNAPSHOT.jar com.autumncode.bartender.PoliteBartender
     What're ya havin'? a glass of water
     Here's your glass of water. Please drink responsibly!
     What're ya havin'? a toeful of shoe polish
@@ -936,6 +938,7 @@ Our [PoliteBartender](https://github.com/jottinger/grappaexample/blob/master/src
     What're ya havin'? magnum,water,pls, please
     Here's your magnum of water,pls. Please drink responsibly!
     What're ya havin'? nothing
+    $
 
 ## Colophon
 
@@ -943,4 +946,4 @@ By the way, much appreciation goes to the following individuals, who helped me w
 
 * [Francis Galiegue](https://github.com/fge), who helped by reviwing the text, by pointing out various errors in my grammars, and by writing [Grappa](https://github.com/fge/grappa) in the first place
 * [Chris Brenton](https://github.com/ChrisBrenton), who reviewed (a lot!) and helped me tune the messaging
-* Ragnor
+* [Andreas Kirschbaum](https://github.com/akirschbaum), who also reviewed quite a bit

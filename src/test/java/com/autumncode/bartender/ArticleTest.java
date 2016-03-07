@@ -10,8 +10,6 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 public class ArticleTest {
-    ArticleParser parser = Grappa.createParser(ArticleParser.class);
-
     private void testArticleGrammar(String article, boolean status, Rule rule) {
         ListeningParseRunner<Void> runner
                 = new ListeningParseRunner<>(rule);
@@ -37,6 +35,7 @@ public class ArticleTest {
 
     @Test(dataProvider = "articleData")
     public void testOnlyArticle(String article, boolean status) {
+        ArticleParser parser = Grappa.createParser(ArticleParser.class);
         testArticleGrammar(article, status, parser.article());
     }
 
@@ -56,6 +55,7 @@ public class ArticleTest {
 
     @Test(dataProvider = "articleTerminalData")
     public void testArticleTerminal(String article, boolean status) {
+        ArticleParser parser = Grappa.createParser(ArticleParser.class);
         testArticleGrammar(article, status, parser.articleTerminal());
     }
 
@@ -74,6 +74,7 @@ public class ArticleTest {
 
     @Test(dataProvider = "articleWithWhitespaceData")
     public void testArticleWithWhitespace(String article, boolean status) {
+        ArticleParser parser = Grappa.createParser(ArticleParser.class);
         testArticleGrammar(article, status, parser.articleWithWhitespace());
     }
 }

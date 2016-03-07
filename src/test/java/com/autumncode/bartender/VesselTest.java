@@ -10,8 +10,6 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 public class VesselTest {
-    VesselParser parser = Grappa.createParser(VesselParser.class);
-
     private void testGrammar(String corpus, boolean status, Rule rule) {
         ListeningParseRunner<Vessel> runner
                 = new ListeningParseRunner<>(rule);
@@ -50,6 +48,7 @@ public class VesselTest {
 
     @Test(dataProvider = "simpleVesselParseData")
     public void testSimpleVesselParse(String corpus, boolean valid) {
+        VesselParser parser = Grappa.createParser(VesselParser.class);
         testGrammar(corpus, valid, parser.vessel());
     }
 
@@ -70,6 +69,7 @@ public class VesselTest {
 
     @Test(dataProvider = "simpleVesselReturnData")
     public void testSimpleVesselResult(String corpus, boolean valid, Vessel value) {
+        VesselParser parser = Grappa.createParser(VesselParser.class);
         testGrammarResult(corpus, valid, value, parser.VESSEL());
     }
 
@@ -91,6 +91,7 @@ public class VesselTest {
 
     @Test(dataProvider = "articleVesselReturnData")
     public void testArticleVesselResult(String corpus, boolean valid, Vessel value) {
+        VesselParser parser = Grappa.createParser(VesselParser.class);
         testGrammarResult(corpus, valid, value, parser.ARTICLEVESSEL());
     }
 }

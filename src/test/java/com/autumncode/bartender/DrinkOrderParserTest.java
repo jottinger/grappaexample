@@ -12,8 +12,6 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 public class DrinkOrderParserTest {
-    DrinkOrderParser parser = Grappa.createParser(DrinkOrderParser.class);
-
     private void testGrammarResult(String corpus, boolean status, DrinkOrder value, Rule rule) {
         ListeningParseRunner<DrinkOrder> runner
                 = new ListeningParseRunner<>(rule);
@@ -39,6 +37,7 @@ public class DrinkOrderParserTest {
 
     @Test(dataProvider = "drinkOrderProvider")
     public void testDrinkOrderParser(String corpus, boolean valid, DrinkOrder result) {
+        DrinkOrderParser parser = Grappa.createParser(DrinkOrderParser.class);
         testGrammarResult(corpus, valid, result, parser.DRINKORDER());
     }
 }

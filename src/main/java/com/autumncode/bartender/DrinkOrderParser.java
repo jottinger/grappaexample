@@ -33,15 +33,14 @@ public class DrinkOrderParser extends BaseParser<DrinkOrder> {
     }
 
     public Rule OF() {
-        return
-                ignoreCase("of");
+        return ignoreCase("of");
     }
 
     public Rule NOTHING() {
         return sequence(
                 trieIgnoreCase("nothing", "nada", "zilch", "done"),
-                setTerminal(),
-                EOI
+                EOI,
+                setTerminal()
         );
     }
 
@@ -68,10 +67,10 @@ public class DrinkOrderParser extends BaseParser<DrinkOrder> {
                 firstOf(
                         NOTHING(),
                         sequence(
-                                optional(sequence(
+                                optional(
                                         ARTICLE(),
                                         oneOrMore(wsp())
-                                )),
+                                ),
                                 VESSEL(),
                                 oneOrMore(wsp()),
                                 OF(),
