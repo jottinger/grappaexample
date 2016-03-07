@@ -944,6 +944,7 @@ Our [PoliteBartender](https://github.com/jottinger/grappaexample/blob/master/src
 
 By the way, much appreciation goes to the following individuals, who helped me write this in various important ways, and in no particular order:
 
-* [Francis Galiegue](https://github.com/fge), who helped by reviwing the text, by pointing out various errors in my grammars, and by writing [Grappa](https://github.com/fge/grappa) in the first place
+
+* [Francis Galiegue](https://github.com/fge), who helped by reviewing the text, by pointing out various errors in my grammars, and by writing [Grappa](https://github.com/fge/grappa) in the first place
 * [Chris Brenton](https://github.com/ChrisBrenton), who reviewed (a lot!) and helped me tune the messaging
-* [Andreas Kirschbaum](https://github.com/akirschbaum), who also reviewed quite a bit
+* [Andreas Kirschbaum](https://github.com/akirschbaum), who also reviewed quite a bit for the article, especially in early form
